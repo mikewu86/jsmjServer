@@ -1,0 +1,16 @@
+hongzhongmj:
+  ports:
+  - 5105:5105/tcp
+  - 18005:8003/tcp
+  - 28005:7788/tcp
+  environment:
+    NODETYPE: MJGame/hongzhongmj
+    nodeid: '32'
+    RUNENV: develop
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: dockerhub.ucop.io/mobile/mgserver:develop-198c46
+  volumes:
+  - /data/log/mobilegame:/app/log
+  stdin_open: true

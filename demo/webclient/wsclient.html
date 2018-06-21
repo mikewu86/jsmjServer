@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>skynet WebSocket example</title>
+  <script type="text/javascript" src="./zepto.min.js"></script>
+  <script type="text/javascript" src="./wxutils.js"></script>
+  <script type="text/javascript" src="./sproto.js"></script>
+
+<script src="./long.min.js"></script>         <!-- https://raw.github.com/dcodeIO/Long.js/master/dist/Long.min.js -->
+<script src="./bytebuffer.min.js"></script> <!-- https://raw.github.com/dcodeIO/ByteBuffer.js/master/dist/ByteBufferAB.min.js -->
+<script src="./protobuf.min.js"></script>     <!-- https://raw.github.com/dcodeIO/ProtoBuf.js/master/dist/ProtoBuf.min.js -->
+
+</head>
+<body>
+<textarea id="log" style="width: 100%; height: 200px"></textarea><br />
+  <input type="button" value="openConnLinux" id="btnConnLinux" onclick="javascript:openWS('ws://192.168.99.100:8001/ws');" />
+  <input type="button" value="openConn" id="btnConn" onclick="javascript:openWS('ws://127.0.0.1:8001/ws');" />
+  <input type="button" value="send" id="btnSend" onclick="javascript:sensWS();"/>
+  <input type="button" value="sendPB" id="btnSendPb" onclick="javascript:sendWSPB();"/>
+  <input type="button" value="sendPlain" id="btnSendPlain" onclick="javascript:sendWS('hihihi');"/>
+  <input type="button" value="CloseConn" id="btnClose" onclick="javascript:deCodeTest();"/>
+  <script>
+  function handle_rsp(session, data)
+{
+    console.log(data);
+}
+
+    var log = document.getElementById("log");
+    var ws;
+    function openWS(wsAddr) {
+        ws = new WebSocket(wsAddr);
+        ws.binaryType = "arraybuffer";
+
+        ws.onopen = function(){
+            log.value += "Connected\n";
+          
+        };
+        ws.onmessage = function(ev){
+          console.log(ev);
+            log.value += ev.data + "\n";
+
+            var d = arraybuffer2array(ev.data);
+            console.log(d)
+            sp.dispatch({buf: d, sz: d.length}, handle_rsp, handle_rsp);
+        };
+        ws.onclose = function(ev){
+            log.value += "Disconnected\n";
+        };
+
+        ws.onerror = function(ev){
+         alert("error");
+        };
+    }
+
+    function deCodeTest() {
+      var ttt = [85, 2, 4, 6, 3, 64, 8, 252, 112, 108, 97, 116, 102, 111, 199, 114, 109, 4, 103, 97, 199, 109, 101, 9, 116, 101, 127, 115, 116, 116, 111, 107, 101, 110];
+      sp.dispatch({buf: ttt, sz: ttt.length}, handle_rsp, handle_rsp);
+    }
+
+    function sendWS(data) {
+      ws.send(data);
+    }
+
+    function sendWSPB() {
+      var jsonData = {};
+      jsonData["name"] = "testpb";
+      jsonData["payload"] = "xxasdasdsa";
+      var msg = new Message(jsonData);
+      sendWS(msg.toArrayBuffer());
+    }
+
+    function sensWS() {
+      var s = {};
+s.what = "testget";
+      sp.host("package");
+      var packer = sp.attach();
+      var p = packer("get", s, 1).buf;
+      var d = array2arraybuffer(p);
+      console.log(p)
+      console.log(d)
+//      var d2 = arraybuffer2array(d);
+//      console.log(d2)
+//sp.dispatch({buf: d2, sz: d2.length}, handle_rsp, handle_rsp);
+
+
+      sendWS(d);
+    }
+
+    var sp;
+var str;
+var xhr = new XMLHttpRequest();
+xhr.open('GET', './sproto.spb', true);
+xhr.responseType = 'arraybuffer';
+xhr.onload = function(e) {
+    var buff = xhr.response;
+    var dataview = new DataView(buff);
+    var schema = new Array();
+    for (var i = 0; i < dataview.byteLength; i++) { 
+        schema[i] = dataview.getUint8(i); 
+    } 
+    sp = Sproto.createNew({buf:schema, sz:schema.length});
+    if (sp == null) {
+        alert("failed to create sproto");
+    }
+    else {
+      alert("init sproto ok");
+    }
+};
+
+
+  // Initialize ProtoBuf.js
+var ProtoBuf = dcodeIO.ProtoBuf;
+var Message = ProtoBuf.loadProtoFile("./netmsg.proto").build("netmsg.NetMsg");
+
+xhr.send();
+  </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+.package {
+    type 0 : integer
+    session 1 : integer
+}
+
+heartbeatReq 2 {
+        request {
+                ts 0 : string
+        }
+}
+
+heartbeatRes 3 {
+        request {
+                ts 0 : string
+        }
+}
+
+
+loginReq 101 {
+        request {
+                uid 0 : integer
+                token 1 : string
+                gameid 2 : integer
+                nodeid 3 : integer
+        }
+        response {
+                result 0 : integer
+                message 1 : string
+                secret 2 : string
+                serveraddr 3 : string
+                nodename 4 : string
+                subid 5 : string
+        }
+}
+
+entergameReq 301 {
+        request {
+                groupid 0 : integer
+        }
+}
+
+userreadyReq 302 {
+        request {
+
+        }
+}
+
+changeRoomReq 303 {
+        request {
+                
+        }
+}
+ 
+    
+playcard 501 {
+		request {
+                card 0 : *integer
+        }
+}
+    
+    
+entergameNotify 401 {
+        request {
+                ret 0 : boolean
+                msg 1 : string
+        }
+}
+
+enterroomRes 402 {
+        request {
+                ret 0 : boolean
+                roomid 1 : integer
+
+        }
+}
+
+enterroomNotify 403 {
+        request {
+                uid 0 : integer
+                entertype 1 : integer
+        }
+}
+
+userreadyNotify 404 {
+        request {
+                uid 0 : integer
+        }        
+}
+
+roomstatuNotify 405 {
+        request {
+                roomid 0 : integer
+                status 1 : integer
+        }
+}
+
+    
+playcardNotify 601 {
+		request {
+				uid 0 : integer
+                card 1 : *integer
+        }
+}
+

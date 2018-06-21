@@ -1,0 +1,37 @@
+.package {
+    type 0 : integer
+    session 1 : integer
+}
+
+heartbeatReq 2 {
+        request {
+                ts 0 : string
+        }
+}
+
+heartbeatRes 3 {
+        request {
+                ts 0 : string
+        }
+}
+
+
+loginReq 101 {
+        request {
+                uid 0 : string
+                token 1 : string
+                gameid 2 : string
+                nodeid 3 : string
+                addtest 4 : string
+        }
+        response {
+                result 0 : integer
+                message 1 : string
+                secret 2 : string
+                serveraddr 3 : string
+                nodename 4 : string
+                subid 5 : string
+                needcutback 6 : boolean   #是否需要掉线重入
+                cutbackgroupid 7 : integer   #掉线重入的groupid
+        }
+}

@@ -1,0 +1,249 @@
+.package {
+    type 0 : integer
+    session 1 : integer
+}
+
+heartbeatReq 2 {
+        request {
+                ts 0 : string
+        }
+}
+
+heartbeatRes 3 {
+        request {
+                ts 0 : string
+        }
+}
+
+
+.playerData {
+        uid 0 : integer
+        nickname 1 : string
+        sex 2 : integer
+        money 3 : integer
+        face 4 : integer
+        logo 5 : string
+        wincount 6 : integer
+        losecount 7 : integer
+        drawcount 8 : integer
+        Pos 9 : integer
+}
+
+loginReq 101 {
+        request {
+                uid 0 : string
+                token 1 : string
+                gameid 2 : string
+                nodeid 3 : string
+                addtest 4 : string
+        }
+        response {
+                result 0 : integer
+                message 1 : string
+                secret 2 : string
+                serveraddr 3 : string
+                nodename 4 : string
+                subid 5 : string
+                needcutback 6 : boolean   #是否需要掉线重入
+                cutbackgroupid 7 : integer   #掉线重入的groupid
+        }
+}
+
+entergameReq 301 {
+        request {
+                groupid 0 : integer
+        }
+}
+
+userreadyReq 302 {
+        request {
+
+        }
+}
+
+changeRoomReq 303 {
+        request {
+                
+        }
+}
+#玩家请求站起
+userStandupReq 304 {
+        request {
+                isstandup 0 : integer   #1:站起  0:坐下
+        }
+}
+#玩家聊天请求
+gamechatReq 305 {
+        request {
+                chatrange 0 : integer  #聊天范围 1：room  2:group 3:game 4:all
+                chatcontent 1 : string  #聊天内容
+        }
+}
+#玩家离开房间请求
+
+#玩家操作    
+handleOnPlayerOperation 501 {
+    request {
+                Operation 0 : integer   # callpoint landlord addscord outcard pass 
+                OperationSeq 1 : integer #操作序号
+                Param 2 : integer   # point   
+                Cards 3 : *integer #加注数量
+        }
+}
+    
+    
+entergameNotify 401 {
+        request {
+                ret 0 : boolean
+                msg 1 : string
+        }
+}
+
+enterroomRes 402 {
+        request {
+                ret 0 : boolean
+                roomid 1 : integer
+                players 2 : *playerData
+                maxplayer 3 : integer   #桌子上最大游戏人数
+                unitcoin 4 : integer  #桌子的基础分  德州一般为大盲注的金额
+
+        }
+}
+
+enterroomNotify 403 {
+        request {
+                uid 0 : integer
+                status 1 : integer   # 参见 Enums.PlayerState
+                pos 2 : integer   #用户的座位号
+                data 3 : *playerData
+        }
+}
+
+userreadyNotify 404 {
+        request {
+                uid 0 : integer
+        }        
+}
+
+roomstatuNotify 405 {
+        request {
+                roomid 0 : integer
+                status 1 : integer
+        }
+}
+
+entergameRes 406 {
+        request {
+              roomid 0 : integer
+        }
+}
+
+leaveroomNotify 407 {
+        request {
+              uid 0 : integer
+        }
+}
+#玩家请求站起结果
+userStandupRes 408 {
+        request {
+                ret 0 : boolean
+                isstandup 1 : boolean   #请求的值 true:站起  false:坐下
+                errormsg 2 : string  #如果ret=false 这里是出错原因
+        }
+}
+#玩家请求站起通知
+userStandupNotify 409 {
+        request {
+                uid 0 : integer
+                isstandup 1 : boolean   #true:站起  false:坐下
+        }
+}
+#聊天广播
+gamechatNotify 410 {
+        request {
+                uid 0 : integer   #聊天发起人
+                dest 1 : integer  #聊天接受人  为0为所有人
+                content 2 : string #聊天内容
+        }
+}
+#给玩家发牌    
+addHandCardNotifyReq 601 {
+        request {
+			OperationSeq 0 : integer #操作序号
+			Pos 1 : integer
+		        Cards 2 : *integer
+
+        }
+}
+baseCardNotify 602 {
+        request {
+            OperationSeq 0 : integer #操作序号	
+            Cards 1 :  *integer
+        }
+}
+
+
+
+playerCallPointReq 603 {
+        request {
+	    OperationSeq 0 : integer
+            Pos 1 : integer
+
+        }
+}
+
+playerGrabLandLordReq 604 {
+        request {
+            OperationSeq 0 : integer
+            Pos 1 : integer
+        }
+}
+
+playerDoubleScoreReq 605 {
+        request {
+            OperationSeq 0 : integer
+            Pos 1 : integer
+        }
+}
+
+playerPlayCardReq 606 {  #call point end , start play card
+        request {
+	    OperationSeq 0 : integer
+            Pos 1 : integer
+            Op 2 : integer
+        }
+}
+
+playerOutCardsRes_All 607 {
+        request {
+	    OperationSeq 0 : integer #操作序号	
+            Operation 1 : integer 
+            Pos 2 : integer
+            Cards 3 : *integer
+		
+        }
+}
+
+playerPassCardRes_All 608 {
+        request {
+            Operation 0 : integer 
+            Pos 1 : integer
+	    OperationSeq 2 : integer #操作序号	
+        }
+}
+
+gameResult_All 609 {
+        request {
+            OperationSeq 0 : integer 
+            times 1 : *integer # 保存结算倍数
+            money 2 : *integer # 每个玩家的加减钱
+        }
+}
+
+playerClientNotify 610 {
+        request {
+            OperationSeq 0 : integer
+            NotifyType 1 : integer
+            Params 2 : *integer
+    }
+}

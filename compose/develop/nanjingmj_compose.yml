@@ -1,0 +1,16 @@
+nanjingmj:
+  ports:
+  - 5106:5106/tcp
+  - 18006:8003/tcp
+  - 28006:7788/tcp
+  environment:
+    NODETYPE: MJGame/nanjingmj
+    nodeid: '9'
+    RUNENV: develop
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: dockerhub.ucop.io/mobile/mgserver:develop-45a33d
+  volumes:
+  - /data/log/mobilegame:/app/log
+  stdin_open: true

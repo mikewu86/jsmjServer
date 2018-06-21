@@ -1,0 +1,34 @@
+FROM ubuntu:14.04
+
+MAINTAINER Liuq <liuq@uc888.cn>
+
+RUN mv /etc/apt/sources.list /etc/apt/sources.list_backup
+COPY ./docker/sources.list /etc/apt/sources.list
+
+RUN apt-get update -y && \
+	apt-get install -y curl autoconf gcc make git libreadline-dev python && \
+	mkdir -p /app/src
+
+RUN cd /app/src && \
+	git clone https://github.com/cloudwu/skynet.git && \
+	cd skynet && \
+	make linux && \
+	cd ..
+	
+COPY ./Makefile /app/src/Makefile
+COPY ./platform.mk /app/src/platform.mk
+
+COPY ./lualib-src/ /app/src/lualib-src
+
+RUN mkdir -p /app/log
+
+RUN cd /app/src && \
+	make linux
+
+COPY ./src/ /app/src/src
+COPY ./docker/entrypoint.sh /app/src/entrypoint.sh
+
+WORKDIR /app/src
+
+
+ENTRYPOINT ["/app/src/entrypoint.sh"]

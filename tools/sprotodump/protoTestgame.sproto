@@ -1,0 +1,17 @@
+.package {
+	type 0 : integer
+	session 1 : integer
+}
+
+playcard 1 {
+		request {
+                card 0 : *integer
+        }
+}
+
+playcardnotify 101 {
+		request {
+				uid 0 : integer
+                card 1 : *integer
+        }
+}

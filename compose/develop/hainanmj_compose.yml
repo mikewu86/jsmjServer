@@ -1,0 +1,16 @@
+hainanmj:
+  ports:
+  - 5103:5103/tcp
+  - 18003:8003/tcp
+  - 28003:7788/tcp
+  environment:
+    NODETYPE: MJGame/hainanmj
+    nodeid: '43'
+    RUNENV: develop
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: dockerhub.ucop.io/mobile/mgserver:develop-2017062705
+  volumes:
+  - /data/log/mobilegame:/app/log
+  stdin_open: true

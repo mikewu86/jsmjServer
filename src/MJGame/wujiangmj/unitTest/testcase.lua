@@ -1,0 +1,816 @@
+﻿local testcase = {
+}
+--- 混一色 绕搭
+-- testcase[1] = {}
+-- testcase[1].handcards = {}
+-- testcase[1].handcards[1] = {
+--     '一万', '二万','三万','四万','五万','六万', '东',
+-- }
+-- testcase[1].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[1].handcards[3] = {
+--     '一筒', '二筒','三筒','四筒','五筒'
+-- }
+-- testcase[1].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[1].newcards = {'一万',}
+-- -- 花
+-- testcase[1].huaList = {
+--     {'春', '夏', '秋', '菊'},
+--     {'大白板'},
+--     {'梅'},
+--     {'菊'}
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[1].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[1].piles = {}
+-- testcase[1].piles[1] = {
+--     {
+--         pos = 1, oper = '碰', pos1 = 2,
+--         cards = {'九万', '九万', '九万'}
+--     }
+-- }
+
+-- testcase[1].daCards = {'一万'}
+
+-- -- 结算的参数
+-- testcase[1].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 3,
+--     winnerPosList = {1},
+--     huCard = '东',
+--     isQiangGang = false
+-- }
+-- -- 结果比对
+-- testcase[1].result = {
+--     desc = '混一色 绕搭',
+--     canHu = true,
+--     money = {15, -5, -5, -5},
+--     huLists = {
+--         {1, 11, 16},{},{},{}
+--     },
+-- }
+----------------------------------------
+--- 清一色 对对胡 门风
+-- testcase[2] = {}
+-- testcase[2].handcards = {}
+-- testcase[2].handcards[1] = {
+--      '三万','三万','四万','四万','六万', '六万','一万', 
+-- }
+-- testcase[2].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[2].handcards[3] = {
+--     '一筒', '二筒','三筒','四筒','五筒'
+-- }
+-- testcase[2].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[2].newcards = {'一万'}
+-- -- 花
+-- testcase[2].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[2].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[2].piles = {}
+-- testcase[2].piles[1] = {
+--     {
+--         pos = 1, oper = '碰', pos1 = 2,
+--         cards = {'九万', '九万', '九万'}
+--     },
+--     {
+--         pos = 1, oper = '碰', pos1 = 2,
+--         cards = {'东', '东', '东'}
+--     },
+-- }
+
+-- testcase[2].daCards = {'一万'}
+
+-- -- 结算的参数
+-- testcase[2].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 3,
+--     winnerPosList = {1},
+--     huCard = '东',
+--     isQiangGang = false
+-- }
+-- -- 结果比对
+-- testcase[2].result = {
+--     desc = '清一色 对对胡 门风',
+--     canHu = true,
+--     money = {24, -8, -8, -8},
+--     huLists = {
+--         {1, 11, 9, 4},{},{},{}
+--     },
+-- }
+-- ---------------------------------------
+-- --- 清一色 对对胡 门风
+-- testcase[3] = {}
+-- testcase[3].handcards = {}
+-- testcase[3].handcards[1] = {
+--     '三万', '三万','三万','四万','四万','六万','一万',
+-- }
+-- testcase[3].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[3].handcards[3] = {
+--     '一筒', '二筒','三筒','四筒','五筒'
+-- }
+-- testcase[3].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[3].newcards = {'一万'}
+-- -- 花
+-- testcase[3].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[3].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[3].piles = {}
+-- testcase[3].piles[1] = {
+--     {
+--         pos = 1, oper = '碰', pos1 = 2,
+--         cards = {'九万', '九万', '九万'}
+--     },
+--     {
+--         pos = 1, oper = '碰', pos1 = 2,
+--         cards = {'东', '东', '东'}
+--     },
+-- }
+
+-- testcase[3].daCards = {'一万'}
+
+-- -- 结算的参数
+-- testcase[3].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 3,
+--     winnerPosList = {1},
+--     huCard = '东',
+--     isQiangGang = false
+-- }
+-- -- 结果比对
+-- testcase[3].result = {
+--     desc = '混一色 绕搭',
+--     canHu = true,
+--     money = {27, -9, -9, -9},
+--     huLists = {
+--         {1, 11, 9, 4, 16},{},{},{}
+--     },
+-- }
+-- ---------------------------------------
+-- ---------------------------------------
+-- --- 清一色 对对胡 门风
+-- testcase[4] = {}
+-- testcase[4].handcards = {}
+-- testcase[4].handcards[1] = {
+--     '三万', '三万','三万','四万','四万','一万', '一万',
+-- }
+-- testcase[4].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[4].handcards[3] = {
+--     '一筒', '二筒','三筒','四筒','五筒'
+-- }
+-- testcase[4].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[4].newcards = {'一万'}
+-- -- 花
+-- testcase[4].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[4].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[4].piles = {}
+-- testcase[4].piles[1] = {
+--     {
+--         pos = 1, oper = '碰', pos1 = 2,
+--         cards = {'九万', '九万', '九万'}
+--     },
+--     {
+--         pos = 1, oper = '碰', pos1 = 2,
+--         cards = {'北', '北', '北'}
+--     },
+-- }
+
+-- testcase[4].daCards = {'一万'}
+
+-- -- 结算的参数
+-- testcase[4].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 3,
+--     winnerPosList = {1},
+--     huCard = '东',
+--     isQiangGang = false,
+--     zhuangPos = 2,
+-- }
+-- -- 结果比对
+-- testcase[4].result = {
+--     desc = '三财神',
+--     canHu = true,
+--     money = {51, -17, -17, -17},
+--     huLists = {
+--         {1, 11, 9, 4, 8, 16},{},{},{}
+--     },
+-- }
+-- ---------------------------------------
+-- ---------------------------------------
+-- --- 清一色 对对胡 门风
+-- testcase[5] = {}
+-- testcase[5].handcards = {}
+-- testcase[5].handcards[1] = {
+--     '七万', '七万','七万','九万','四筒', "五筒",'七筒', "八筒", "九筒", '六万'
+-- }
+-- testcase[5].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[5].handcards[3] = {
+--     '一筒', '二筒','三筒','四筒','五筒'
+-- }
+-- testcase[5].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[5].newcards = {'九万'}
+-- -- 花
+-- testcase[5].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[5].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[5].piles = {}
+-- testcase[5].piles[1] = {
+--     {
+--         pos = 1, oper = '碰', pos1 = 2,
+--         cards = {'发', '发', '发'}
+--     },
+-- }
+
+-- testcase[5].daCards = { '六万'}
+
+-- -- 结算的参数
+-- testcase[5].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 3,
+--     winnerPosList = {1},
+--     huCard = nil,
+--     isQiangGang = false,
+--     zhuangPos = 2,
+-- }
+-- -- 结果比对
+-- testcase[5].result = {
+--     desc = '三财神',
+--     canHu = true,
+--     money = {6, -2, -2, -2},
+--     huLists = {
+--         {1},{},{},{}
+--     },
+-- }
+-- ---------------------------------------
+-- --- 清一色 对对胡 门风
+-- testcase[6] = {}
+-- testcase[6].handcards = {}
+-- testcase[6].handcards[1] = {
+--     '一万', '一万','一万','五万','六万', "七万",'三筒', "五筒","六筒",'一条','一条','一条','四筒',
+-- }
+-- testcase[6].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[6].handcards[3] = {
+--     '一筒', '二筒','三筒','四筒','五筒'
+-- }
+-- testcase[6].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[6].newcards = {'四筒'}
+-- -- 花
+-- testcase[6].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[6].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[6].piles = {}
+-- testcase[6].piles[1] = {
+-- }
+
+-- testcase[6].daCards = {'四筒'}
+
+-- -- 结算的参数
+-- testcase[6].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 3,
+--     winnerPosList = {1},
+--     huCard = nil,
+--     isQiangGang = false,
+--     zhuangPos = 2,
+-- }
+-- -- 结果比对
+-- testcase[6].result = {
+--     desc = '三财神',
+--     canHu = true,
+--     money = {36, -12, -12, -12},
+--     huLists = {
+--         {1,16,19},{},{},{}
+--     },
+-- }
+-- ----------------------------------
+-- --- 抢杠
+-- testcase[7] = {}
+-- testcase[7].handcards = {}
+-- testcase[7].handcards[1] = {
+--     '一万', '一万','一万','五万','六万', "七万",'三筒','三筒', "八筒","六筒",'二条','三条','四筒'
+-- }
+-- testcase[7].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[7].handcards[3] = {
+--     '一筒', '二筒','三筒','四筒','五筒'
+-- }
+-- testcase[7].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[7].newcards = {}
+-- -- 花
+-- testcase[7].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[7].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[7].piles = {}
+-- testcase[7].piles[1] = {
+-- }
+-- testcase[7].piles[3] = {
+--     {
+--         pos = 3, oper = '碰', pos1 = 4,
+--         cards = {'一条', '一条', '一条'}
+--     },
+--     {
+--         pos = 3, oper = '面下杠', pos1 = 1,
+--         cards = {'一条', '一条', '一条', '一条'}
+--     },
+-- }
+
+-- testcase[7].daCards = {'四筒'}
+
+-- -- 结算的参数
+-- testcase[7].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = false,
+--     fangPaoPos = 3,
+--     winnerPosList = {1},
+--     huCard = '一条',
+--     isQiangGang = true,
+--     zhuangPos = 2,
+-- }
+-- -- 结果比对
+-- testcase[7].result = {
+--     desc = '抢杠',
+--     canHu = true,
+--     money = {9, -3, -3, -3},
+--     huLists = {
+--         {1, 15},{},{},{}
+--     },
+-- }
+-- --------------------------------------------------
+-- --- 抢杠
+-- testcase[8] = {}
+-- testcase[8].handcards = {}
+-- testcase[8].handcards[1] = {
+--     '一万', '一万','一万','五万','六万', "七万",'三筒','三筒', "八筒","六筒",'二条','三条','四筒'
+-- }
+-- testcase[8].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[8].handcards[3] = {
+--     '一万', '一万','三筒','四筒'
+-- }
+-- testcase[8].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[8].newcards = {}
+-- -- 花
+-- testcase[8].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[8].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[8].piles = {}
+-- testcase[8].piles[1] = {
+-- }
+-- testcase[8].piles[3] = {
+--     {
+--         pos = 3, oper = '碰', pos1 = 1,
+--         cards = {'一条', '一条', '一条'}
+--     },
+--     {
+--         pos = 3, oper = '碰', pos1 = 1,
+--         cards = {'二条', '二条', '二条',}
+--     },
+--         {
+--         pos = 3, oper = '碰', pos1 = 1,
+--         cards = {'三条', '三条', '三条',}
+--     },
+-- }
+
+-- testcase[8].daCards = {'四筒'}
+
+-- -- 结算的参数
+-- testcase[8].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = false,
+--     fangPaoPos = 2,
+--     winnerPosList = {3},
+--     huCard = '一万',
+--     isQiangGang = false,
+--     zhuangPos = 2,
+-- }
+-- -- 结果比对
+-- testcase[8].result = {
+--     desc = '包牌',
+--     canHu = true,
+--     money = {-15, 0, 15, 0},
+--     huLists = {
+--         {},{},{1,9,16},{}
+--     },
+-- }
+-- --------------------------------------------------------------
+-- --- 抢杠
+-- testcase[9] = {}
+-- testcase[9].handcards = {}
+-- testcase[9].handcards[1] = {
+--     '二万', '三万','四万','五万','一筒','六万', '六万'
+-- }
+-- testcase[9].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[9].handcards[3] = {
+--     '一万', '一万','三筒'
+-- }
+-- testcase[9].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[9].newcards = {'一筒'}
+-- -- 花
+-- testcase[9].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[9].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[9].piles = {}
+-- testcase[9].piles[1] = {
+--      {
+--         pos = 3, oper = '碰', pos1 = 1,
+--         cards = {'一条', '一条', '一条'}
+--     },
+--      {
+--         pos = 3, oper = '碰', pos1 = 1,
+--         cards = {'一条', '一条', '一条'}
+--     }
+-- }
+-- testcase[9].piles[3] = {
+--     {
+--         pos = 3, oper = '碰', pos1 = 1,
+--         cards = {'一条', '一条', '一条'}
+--     },
+--     {
+--         pos = 3, oper = '碰', pos1 = 1,
+--         cards = {'二条', '二条', '二条',}
+--     },
+--         {
+--         pos = 3, oper = '碰', pos1 = 1,
+--         cards = {'三条', '三条', '三条',}
+--     },
+-- }
+
+-- testcase[9].daCards = {'六万'}
+
+-- -- 结算的参数
+-- testcase[9].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 2,
+--     winnerPosList = {1},
+--     huCard = '一万',
+--     isQiangGang = false,
+--     zhuangPos = 2,
+-- }
+-- -- 结果比对
+-- testcase[9].result = {
+--     desc = '绕搭',
+--     canHu = true,
+--     money = {36, -12, -12, -12},
+--     huLists = {
+--         {1,19,16},{},{},{}
+--     },
+-- }
+-- --------------------------------------------------------------
+-- --- 抢杠
+-- testcase[10] = {}
+-- testcase[10].handcards = {}
+-- testcase[10].handcards[1] = {
+--     '四万','三条','三条','四条','四条','六筒','四条','六筒','六筒','三条',
+-- }
+-- testcase[10].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[10].handcards[3] = {
+--     '一万', '一万','三筒'
+-- }
+-- testcase[10].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[10].newcards = {'一万'}
+-- -- 花
+-- testcase[10].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[10].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[10].piles = {}
+-- testcase[10].piles[1] = {
+--      {
+--         pos = 3, oper = '碰', pos1 = 1,
+--         cards = {'西', '西', '西'}
+--     },
+-- }
+-- testcase[10].piles[3] = {
+
+-- }
+
+-- testcase[10].daCards = {'一万'}
+
+-- -- 结算的参数
+-- testcase[10].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 2,
+--     winnerPosList = {1},
+--     huCard = nil,
+--     isQiangGang = false,
+--     zhuangPos = 2,
+-- }
+-- -- 结果比对
+-- testcase[10].result = {
+--     desc = '绕搭',
+--     canHu = true,
+--     money = {36, -12, -12, -12},
+--     huLists = {
+--         {1,19,16},{},{},{}
+--     },
+-- }
+-- ---------------------------------------------------------------
+-- --- 对对胡
+-- testcase[11] = {}
+-- testcase[11].handcards = {}
+-- testcase[11].handcards[1] = {
+--     '七筒','七筒','八筒','八筒','九筒','九筒','一条','一条','三条','三条','三条','四条','四条'
+-- }
+-- testcase[11].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[11].handcards[3] = {
+--     '一万', '一万','三筒'
+-- }
+-- testcase[11].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[11].newcards = {'四条'}
+-- -- 花
+-- testcase[11].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[11].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[11].piles = {}
+-- testcase[11].piles[1] = {
+
+-- }
+-- testcase[11].piles[3] = {
+
+-- }
+
+-- testcase[11].daCards = {'一条'}
+
+-- -- 结算的参数
+-- testcase[11].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 2,
+--     winnerPosList = {1},
+--     huCard = nil,
+--     isQiangGang = false,
+--     zhuangPos = 2,
+-- }
+-- -- 结果比对
+-- testcase[11].result = {
+--     desc = '对对胡',
+--     canHu = true,
+--     money = {42, -14, -14, -14},
+--     huLists = {
+--         {1,19,9},{},{},{}
+--     },
+-- }
+-- -----------------------------------------------
+-- --- 对对胡
+-- testcase[12] = {}
+-- testcase[12].handcards = {}
+-- testcase[12].handcards[1] = {
+--     '五万','五万','五万','六万','六万','六万','七万','七万','七万','一条','一条','一条','南'
+-- }
+-- testcase[12].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[12].handcards[3] = {
+--     '一万', '一万','三筒'
+-- }
+-- testcase[12].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[12].newcards = {'南'}
+-- -- 花
+-- testcase[12].huaList = {
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[12].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[12].piles = {}
+-- testcase[12].piles[1] = {
+
+-- }
+-- testcase[12].piles[3] = {
+
+-- }
+
+-- testcase[12].daCards = {'南'}
+
+-- -- 结算的参数
+-- testcase[12].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = nil,
+--     winnerPosList = {1},
+--     huCard = nil,
+--     isQiangGang = false,
+--     zhuangPos = 2,
+-- }
+-- -- 结果比对
+-- testcase[12].result = {
+--     desc = '对对胡 raoda',
+--     canHu = true,
+--     money = {45, -15, -15, -15},
+--     huLists = {
+--         {1,19,16, 9},{},{},{}
+--     },
+-- }
+
+-- testcase[1] = {}
+-- testcase[1].handcards = {}
+-- testcase[1].handcards[1] = {
+--    -- '中', '中','中','四万','五万','六万', '东',
+--   '四万','五万','六万', '三万',
+-- }
+-- testcase[1].handcards[2] = {
+--     '一条', '二条','三条','四条','五条'
+-- }
+-- testcase[1].handcards[3] = {
+--     '一筒', '二筒','三筒','四筒','五筒'
+-- }
+-- testcase[1].handcards[4] = {
+--     '一万', '二万','三万','四万','五万'
+-- }
+-- -- 要自摸必须有新牌
+-- testcase[1].newcards = {'西',}
+-- -- 花
+-- testcase[1].huaList = {
+--     {'春', '夏', '秋', '菊'},
+--     {'大白板'},
+--     {'梅'},
+--     {'菊'}
+-- }
+-- -- 上一次的操作,注意，如果要杠开，需要在最后一次操作拿牌，前一次操作杠，或补花
+-- testcase[1].justDoOper = {
+--     {'新牌', '新牌'}, 
+--     {}, 
+--     {}, 
+--     {}
+-- }
+
+-- testcase[1].piles = {}
+-- testcase[1].piles[1] = {
+--     {
+--         pos = 1, oper = '暗杠', pos1 = 2,
+--         cards = {'东', '东', '东', '东'},
+--     },
+--     {
+--         pos = 1, oper = '杠', pos1 = 2,
+--         cards = {'二万', '二万', '二万', '二万'},
+--     },
+--     {
+--         pos = 1, oper = '杠', pos1 = 2,
+--         cards = {'白', '白', '白', '白'},
+--     },
+-- }
+
+-- testcase[1].daCards = {'西'}
+
+-- -- 结算的参数
+-- testcase[1].resultArgs = {
+--     isLiuJu = false, 
+--     isZiMo = true,
+--     fangPaoPos = 3,
+--     winnerPosList = {1},
+--     huCard = '西',
+--     isQiangGang = false
+-- }
+-- -- 结果比对
+-- testcase[1].result = {
+--     desc = '混一色 绕搭',
+--     canHu = true,
+--     money = {15, -5, -5, -5},
+--     huLists = {
+--         {1, 11, 16},{},{},{}
+--     },
+-- }
+------------------------------------
+return testcase

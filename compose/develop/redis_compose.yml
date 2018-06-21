@@ -1,0 +1,11 @@
+redis:
+  ports:
+  - 6379:6379/tcp
+  labels:
+    io.rancher.container.pull_image: always
+  command:
+  - redis-server
+  - --requirepass
+  - Javjav11
+  image: redis:3.0-alpine
+  stdin_open: true

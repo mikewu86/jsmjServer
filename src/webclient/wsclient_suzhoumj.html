@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>skynet WebSocket example</title>
+  <script type="text/javascript" src="./zepto.min.js"></script>
+  <script type="text/javascript" src="./wxutils.js"></script>
+  <script type="text/javascript" src="./sproto.js"></script>
+  <script src="./crypto-js/rollups/md5.js"></script>
+  <script src="./crypto-js/rollups/hmac-md5.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha1.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha3.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha224.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha256.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha384.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha512.js"></script>
+  <script src="./crypto-js/components/enc-base64-min.js"></script>
+  <script src="http://cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script>
+  <meta charset="UTF-8" />
+
+</head>
+<body>
+  <p>登录服务器地址：<input type="text" id="txtLSAddr" value="ws://192.168.99.100:8002/ws"/></p>
+<p>用户id: 
+  <select id="txtUid">
+    <option value="0138abdf8eae6545cee900e5e5ac9dfd">2923</option>
+    <option value="15b1d785e9e2e3728b234b89569793e5">2924</option>
+    <option value="29cb7bf72eb44c33115a6d25c55db825">2925</option>
+    <option value="bde33f039b192bde62592e25601c5fcc">2926</option>
+    <option value="583aa412cc0ef58120b5019e99375230">2927</option>
+    <option value="10efcbd9d98e5b89dae88d16870804fa">2928</option>
+    <option value="6fa80ccc57669c1dfa1f9855465d30f3">2806</option>
+  </select>
+  
+  <input type="checkbox" name="chkAuto" id="chkAuto" value="自动应答" /> 自动应答
+</p>
+
+<textarea id="log" style="width: 100%; height: 200px"></textarea><br />
+
+  <input type="button" value="登录到platform" id="btnSend" onclick="javascript:loginGame('0', '0');"/>
+  <input type="button" value="登录到游戏" id="loginGame" onclick="javascript:loginGame('2', '2');"/>
+
+  <input type="button" value="进入游戏" id="enterGame" onclick="javascript:enterGame();"/>
+  <input type="button" value="游戏中举手" id="userReady" onclick="javascript:userReady();"/>
+  <input type="button" value="换桌子" id="changeRoom" onclick="javascript:changeRoom();"/>
+
+  <input type="button" value="清空输出" id="clearTextArea" onclick="javascript:clearTextArea();">
+  <br/>
+
+<form style="float:left">
+  <select id="userHandCards" size="14"></select>
+  <p>手牌</p>
+</form>
+
+<form style="float:left;margin-left:10px;">
+  <select id="canDoOperations" size="5"></select>
+  <input type="button" id="playerOp" value="确定">
+  <p>操作</p>
+</form>
+
+<form style="float:left;margin-left:10px;">
+  <select id="userFlowerCards" size="10"></select>
+  <p>flower牌</p>
+</form>
+
+<form style="float:left;margin-left:10px;">
+  <select id="pgCards" size="10"></select>
+  <p>碰杠的牌</p>
+</form>
+
+<form style="float:left;margin-left:10px;">
+  <select id="playedCards" size="10"></select>
+  <p>已出的牌</p>
+</form>
+
+  <script>
+    // 麻将牌
+    // flower色
+    var SUIT = {
+        "SUIT_NONE"      : 0 ,      // wu
+        "SUIT_UNKNOWN"   : 1 ,      // 未知
+        "SUIT_WAN"       : 2 ,      // 万
+        "SUIT_TONG"      : 3 ,      // 筒
+        "SUIT_TIAO"      : 4 ,      // 条
+        "SUIT_FENG"      : 5 ,      // 风　 东南西北
+        "SUIT_JIAN"      : 6 ,      // 箭   中发白
+        "SUIT_HUA"       : 7 ,      // flower   梅兰竹菊 春夏秋冬
+        "SUIT_TYPE_SUM"  : 8 ,
+    };
+    // 牌值
+    var VALUE = {
+        "VALUE_NONE"        : 0 ,      // wu
+        "VALUE_1"           : 1 ,      // 1
+        "VALUE_2"           : 2 ,      // 2
+        "VALUE_3"           : 3 ,      // 3
+        "VALUE_4"           : 4 ,      // 4
+        "VALUE_5"           : 5 ,      // 5
+        "VALUE_6"           : 6 ,      // 6
+        "VALUE_7"           : 7 ,      // 7
+        "VALUE_8"           : 8 ,      // 8
+        "VALUE_9"           : 9 ,      // 9
+        "VALUE_FENG_DONG"   : 10 ,     // 东 10
+        "VALUE_FENG_NAN"    : 11 ,     // 南
+        "VALUE_FENG_XI"     : 12 ,     // 西
+        "VALUE_FENG_BEI"    : 13 ,     // 北
+        "VALUE_JIAN_ZHONG"  : 14 ,     // 中
+        "VALUE_JIAN_FA"     : 15 ,     // 发 15 
+        "VALUE_JIAN_BAI"    : 16 ,     // 白
+        "VALUE_HUA_CHUN"    : 17 ,     // 春 17
+        "VALUE_HUA_XIA"     : 18 ,     // 夏
+        "VALUE_HUA_QIU"     : 19 ,     // 秋
+        "VALUE_HUA_DONG"    : 20 ,     // 冬
+        "VALUE_HUA_MEI"     : 21 ,     // 梅
+        "VALUE_HUA_LAN"     : 22 ,     // 兰
+        "VALUE_HUA_ZHU"     : 23 ,     // 竹
+        "VALUE_HUA_JU"      : 24 ,     // 菊
+        "VALUE_HUA_CAI"     : 25 ,     // 财   25 + 18 = 43
+        "VALUE_HUA_BAO"     : 26 ,     // 宝
+        "VALUE_HUA_MAO"     : 27 ,     // 猫
+        "VALUE_HUA_SHU"     : 28 ,     // 鼠
+        "VALUE_HUA_BLANK"   : 29 ,     // da白板
+        "VALUE_TYPE_SUM"    : 30 ,     // 48
+    };
+    // flower色字符串
+    var SUIT_STR = {};
+    SUIT_STR[SUIT.SUIT_NONE]      = "空";
+    SUIT_STR[SUIT.SUIT_UNKNOWN]   = "未知";
+    SUIT_STR[SUIT.SUIT_WAN]       = "万";
+    SUIT_STR[SUIT.SUIT_TONG]      = "筒";
+    SUIT_STR[SUIT.SUIT_TIAO]      = "条";
+    SUIT_STR[SUIT.SUIT_FENG]      = "风";
+    SUIT_STR[SUIT.SUIT_JIAN]      = "箭";
+    SUIT_STR[SUIT.SUIT_HUA]       = "花";
+    SUIT_STR[SUIT.SUIT_TYPE_SUM]  = "";
+    // 牌值字符串
+    var VALUE_STR = {};
+    VALUE_STR[VALUE.VALUE_NONE]          = "";
+    VALUE_STR[VALUE.VALUE_1]             = "一";
+    VALUE_STR[VALUE.VALUE_2]             = "二";
+    VALUE_STR[VALUE.VALUE_3]             = "三";
+    VALUE_STR[VALUE.VALUE_4]             = "四";
+    VALUE_STR[VALUE.VALUE_5]             = "五";
+    VALUE_STR[VALUE.VALUE_6]             = "六";
+    VALUE_STR[VALUE.VALUE_7]             = "七";
+    VALUE_STR[VALUE.VALUE_8]             = "八";
+    VALUE_STR[VALUE.VALUE_9]             = "九";
+    VALUE_STR[VALUE.VALUE_FENG_DONG]     = "东";
+    VALUE_STR[VALUE.VALUE_FENG_NAN]      = "南";
+    VALUE_STR[VALUE.VALUE_FENG_XI]       = "西";
+    VALUE_STR[VALUE.VALUE_FENG_BEI]      = "北";
+    VALUE_STR[VALUE.VALUE_JIAN_ZHONG]    = "中";
+    VALUE_STR[VALUE.VALUE_JIAN_FA]       = "发";
+    VALUE_STR[VALUE.VALUE_JIAN_BAI]      = "白";
+    VALUE_STR[VALUE.VALUE_HUA_CHUN]      = "春";
+    VALUE_STR[VALUE.VALUE_HUA_XIA]       = "夏";
+    VALUE_STR[VALUE.VALUE_HUA_QIU]       = "秋";
+    VALUE_STR[VALUE.VALUE_HUA_DONG]      = "冬";
+    VALUE_STR[VALUE.VALUE_HUA_MEI]       = "梅";
+    VALUE_STR[VALUE.VALUE_HUA_LAN]       = "兰";
+    VALUE_STR[VALUE.VALUE_HUA_ZHU]       = "竹";
+    VALUE_STR[VALUE.VALUE_HUA_JU]        = "菊";
+    VALUE_STR[VALUE.VALUE_HUA_CAI]       = "财";
+    VALUE_STR[VALUE.VALUE_HUA_BAO]       = "宝";
+    VALUE_STR[VALUE.VALUE_HUA_MAO]       = "猫";
+    VALUE_STR[VALUE.VALUE_HUA_SHU]       = "鼠";
+    VALUE_STR[VALUE.VALUE_HUA_BLANK]     = "大白板";
+    VALUE_STR[VALUE.VALUE_TYPE_SUM]      = "";
+    // 玩家操作
+    var OP_TYPE = {
+        "MJGAME_BASE_OPERATION_TYPE_NONE"      :   0  ,
+        "MJGAME_BASE_OPERATION_CHU"            :   1  ,
+        "MJGAME_BASE_OPERATION_PASS"           :   2  ,
+        "MJGAME_BASE_OPERATION_CHI"            :   3  ,
+        "MJGAME_BASE_OPERATION_PENG"           :   4  ,
+        "MJGAME_BASE_OPERATION_GANG"           :   5  ,
+        "MJGAME_BASE_OPERATION_CHEATHU"        :   6  ,
+        "MJGAME_BASE_OPERATION_HU"             :   7  ,
+        "MJGAME_BASE_OPERATION_TING"           :   8  ,
+        "MJGAME_BASE_OPERATION_MING"           :   9  ,
+        "MJGAME_BASE_OPERATION_TIMEOUT"        :   10 ,
+        "MJGAME_BASE_OPERATION_MO"             :   11 ,
+        "MJGAME_BASE_OPERATION_BU"             :   12 ,
+        "MJGAME_BASE_OPERATION_TUOGUAN"        :   13 ,
+        "MJGAME_BASE_OPERATION_CANCEL_TUOGUAN" :   14 ,
+        "MJGAME_BASE_OPREATION_TING_AFTER_CHI" :   15 ,
+        "MJGAME_BASE_OPERATION_TING_AFTER_PENG":   16 ,
+        "MJGAME_BASE_OPERATION_TYPE_SUM"       :   17 ,
+    };
+    //玩家操作字符串
+    var OP_STR = {};
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_TYPE_NONE]      = "";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_CHU]            = "出";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_PASS]           = "过";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_CHI]            = "吃";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_PENG]           = "碰";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_GANG]           = "杠";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_HU]             = "胡";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_TING]           = "听";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_TUOGUAN]        = "托管";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_CANCEL_TUOGUAN] = "取消托管";
+    OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_TYPE_SUM]       = "";
+    //玩家通知类型
+    var PLAYER_OP = {
+        "DICE_NUMBER"    :  0  ,
+        "ZHUANG"         :  1  ,
+        "PLAYER_CHU"     :  2  ,
+        "PLAYER_PENG"    :  3  ,
+        "PLAYER_GANG"    :  4  ,
+        "PLAYER_HU"      :  5  ,
+    };
+    //手牌操作
+    var CARD_OP = {
+        "REMOVE"   :  0  ,
+        "ADD"      :  1  ,
+    }
+
+    var cardBitMask = Math.pow(2,5);
+	  var nodeID;
+    function getCardSuit(card){
+        var suit = Math.floor(card / cardBitMask);
+        return SUIT_STR[suit]
+    }
+
+    function getCardValue(card){
+        var suit = Math.floor(card / cardBitMask);
+        var value = card - suit * cardBitMask;
+        return VALUE_STR[value]
+    }
+
+    function getCardSuitByte(card){
+      var suit = Math.floor(card / cardBitMask);
+      return suit
+    }
+
+    function getCardValueByte(card){
+      var suit = Math.floor(card / cardBitMask)
+      var value = card - suit * cardBitMask
+      return value
+    }
+
+    function isFlowerCard(card){
+      var cardDataSuit = getCardSuitByte(card);
+      if(cardDataSuit >= SUIT["SUIT_JIAN"]){
+        return true
+      }
+      return false
+    }
+
+    function checkOperation(op){
+      var operations = new Array();
+      for(i = 0; i < OP_TYPE["MJGAME_BASE_OPERATION_TYPE_SUM"]; i++){
+        if((1<<i) & op){
+          operations.push(i);
+        }
+      }
+      return operations
+    }
+
+    //麻将牌排序
+    function sortHandCards(a,b){
+      if(getCardSuitByte(a) == getCardSuitByte(b)){
+        return getCardValueByte(a) - getCardValueByte(b)
+      }
+      return getCardSuitByte(a) - getCardSuitByte(b)
+    }
+
+    // 数组对象删除元素方法
+    Array.prototype.indexOf = function(val) {
+      for(var i = 0; i < this.length; i++){
+        if(this[i] == val) return i;
+      }
+      return -1;
+    };
+
+    Array.prototype.remove = function(val) {
+      var index = this.indexOf(val);
+        if (index > -1) {
+          this.splice(index, 1);
+        }
+    };
+
+    $("#playerOp").click(function(){
+      var checkOpText = $("#canDoOperations").find("option:selected").text();
+      var checkOpValue = $("#canDoOperations").val();
+
+      if (checkOpValue == OP_TYPE["MJGAME_BASE_OPERATION_CHU"]){
+        var checkCardText = $("#userHandCards").find("option:selected").text();
+        var checkCardValue = $("#userHandCards").val();
+        log.value += "我出牌:" + checkCardText + " 牌值:" + checkCardValue + " \n";
+        sendCard(Number(checkCardValue));
+      }else if(checkOpValue == OP_TYPE["MJGAME_BASE_OPERATION_GANG"]){
+        log.value += "我杠:" + checkCardText + " 牌值:" + sendgangCard + " \n";
+        gangCard();
+      }else{
+        log.value += "我的动作:" + checkOpText + " \n";
+        var onPlayerOperation = {};
+        onPlayerOperation.OperationSeq = 100;
+        onPlayerOperation.operation = Number(checkOpValue);
+        var p = packerGame("onPlayerOperation", onPlayerOperation).buf;
+        var d = Sproto.array2arraybuffer(p);
+        wsPool[nodeID].send(d);
+      }
+    });
+
+    function sendCard(card){
+      var onPlayerOperation = {};
+      onPlayerOperation.OperationSeq = 300;
+      onPlayerOperation.operation = OP_TYPE["MJGAME_BASE_OPERATION_CHU"];
+      onPlayerOperation.card_bytes = card;
+      console.log("send card to server:" + onPlayerOperation.card_bytes);
+      var p = packerGame("onPlayerOperation", onPlayerOperation).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[nodeID].send(d);
+    }
+
+    function gangCard(){
+      var onPlayerOperation = {};
+      onPlayerOperation.OperationSeq = 400;
+      onPlayerOperation.operation = OP_TYPE["MJGAME_BASE_OPERATION_GANG"];
+      onPlayerOperation.card_bytes = sendgangCard;
+      console.log("gang card:" + onPlayerOperation.card_bytes);
+      var p = packerGame("onPlayerOperation", onPlayerOperation).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[nodeID].send(d);
+    }
+
+  // Create Base64 Object
+
+// 玩家数据
+    var player = {};
+    player.cards = [];
+    player.flowerCards = [];
+    player.playedCards = [];
+    player.pengCards = [];
+    player.gangCards = [];
+    player.flowerCount = 0;
+
+    var log = document.getElementById("log");
+    var tUid = document.getElementById("txtUid");
+    var tToken = document.getElementById("txtToken");
+    var cAuto = document.getElementById("chkAuto");
+    var reqSession = 0;
+    var loginGameSession = 0;
+    var gamesrvAddr = "";
+    var ws;
+
+    var wsLogin;
+    var wsGame;
+    var gsLoginIndex = 0;
+    var nodeName = "";
+    var nodeSecret = "";
+    var nodeSubid = "";
+
+    var testUid = "2923";
+    var testToken = "";
+    var client_key = null;
+    
+    var currentOperationSeq = 0;
+    
+    var myRoomPos = 0;
+    //var myCards=new Array()
+    var minRaiseAmount = 0;
+    var bLandLord = false
+    var sendgangCard = 0
+    var gsClientPro = {
+      heartbeatReq: function(nodeid, data) {
+        //console.log("收到了服务器发送的心跳包:" + data.ts);
+        var s = {};
+        s.ts = data.ts;
+      
+        var p = packer("heartbeatRes", s).buf;
+        var d = Sproto.array2arraybuffer(p);
+        wsPool[nodeid].send(d);
+      },
+      roomstatuNotify: function(nodeid, data) {
+        console.log("收到了服务器发送的房间状态改变消息 room:" + data.roomid + "   status:" + data.status);
+      },
+      enterroomNotify: function(nodeid, data) {
+        console.log("recive user enterroomNotify.");
+        console.log(data);
+        log.value += "uid:" + data.uid + "  enterroom! \n";
+        if (testUid == data.uid) {
+          myRoomPos = data.pos;
+        }
+      },
+      leaveroomNotify: function(nodeid, data) {
+        console.log("recive user leaveroomNotify.");
+        log.value += "uid:" + data.uid + "  leaveroom! \n";
+        console.log(data);
+      },
+      userreadyNotify: function(nodeid, data) {
+        console.log("recive user userreadyNotify.");
+        log.value += "uid:" + data.uid + "  is ready! \n";
+        console.log(data);
+      },
+      userStandupRes: function(nodeid, data) {
+        console.log("recive user userStandupRes.");
+        console.log(data);
+      },
+      userStandupNotify: function(nodeid, data) {
+        console.log("recive user userStandupNotify.");
+        log.value += "有玩家站起/坐下了! \n";
+        console.log(data);
+      },
+      enterroomRes: function(nodeid, data) {
+        console.log("recive user enterroomRes.");
+        log.value += "进入房间成功，同时返回当前房间的玩家信息! \n";
+        console.log(data);
+        for(i = 0; i < data.players.length; i++){
+          if(testUid == data.players[i]["uid"]){
+            myRoomPos = data.players[i]["Pos"];
+          }
+        }
+      },
+      opHandCardNotify: function(nodeid, data) {
+        if (data.Pos == myRoomPos) {
+          if(data.Cards){
+            if (data.Op == CARD_OP["ADD"]){
+              for(i = 0; i < data.Cards.length; i++){
+                player["cards"].push(data.Cards[i]);
+                log.value += "我收到服务器增加牌:" + getCardValue(data.Cards[i]) + getCardSuit(data.Cards[i]) + " 牌值为:" + data.Cards[i] + " \n";
+              }
+              player["cards"].sort(sortHandCards);
+
+            }else{
+              for (i= 0; i < data.Cards.length; i++){
+                  player["cards"].remove(data.Cards[i]);
+                  log.value += "我收到服务器删除牌:" + getCardValue(data.Cards[i]) + getCardSuit(data.Cards[i]) + " 牌值为:" + data.Cards[i] + " \n";
+              }
+            }
+            $("#userHandCards").empty();
+            for(i = 0; i < player["cards"].length; i++){
+              $("#userHandCards").append('<option value="' + player["cards"][i] + '">' +getCardValue(player["cards"][i]) +
+              getCardSuit(player["cards"][i]) + '</option>');
+            }
+          }
+        }
+      },
+      playerClientNotify: function(nodeid, data) {
+        if (data.NotifyType == PLAYER_OP["DICE_NUMBER"]) {
+          log.value += "骰子值:" + data.Params + " \n";
+        }else if(data.NotifyType == PLAYER_OP["ZHUANG"]) {
+          log.value += "庄家位置:" + data.Params + " \n";
+        }
+      },
+      FlowerCardCountNotify: function(nodeid, data) {
+        if (data.Pos == myRoomPos) {
+          if(player.flowerCount != data.Count){
+            $("#userFlowerCards").empty();
+            log.value += "flower牌数: from " + player.flowerCount + " to " + data.Count + " \n";
+            player.flowerCount = data.Count;
+            $("#userFlowerCards").append('<option value="' + data.Count + '">' + data.Count + '</option>');
+          }
+        }else{
+          log.value += "玩家:" + data.Pos + " 花牌数变更为:" + data.Count + " \n";
+        }
+      },
+      playerOperationReq: function(nodeid, data) {
+        if (data.Pos == myRoomPos){
+          $("#canDoOperations").empty();
+          log.value += "轮到我了！"
+          var operations = checkOperation(data.Op);
+          if(operations.indexOf(OP_TYPE["MJGAME_BASE_OPERATION_CHU"]) == -1){
+            $("#canDoOperations").append('<option value="' + OP_TYPE["MJGAME_BASE_OPERATION_PASS"] + '">' + OP_STR[OP_TYPE.MJGAME_BASE_OPERATION_PASS] + '</option>');
+          }
+          for(i = 0; i < operations.length; i++){
+            $("#canDoOperations").append('<option value="' + operations[i] + '">' + OP_STR[operations[i]] + '</option>');
+          }
+        }
+      },
+      opOnDeskOutCard: function(nodeid, data) {
+        if (data.Pos == myRoomPos){
+          if (data.Op == CARD_OP["REMOVE"]){
+            $("#playedCards option[value='" + data.Card + "']").remove();
+            player["playedCards"].remove(data.Card);
+            log.value += "我删除已出牌:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+          }else if(data.Op == CARD_OP["ADD"]){
+            $("#playedCards").append('<option value="' + data.Card + '">' + getCardValue(data.Card) +
+              getCardSuit(data.Card) + '</option>');
+            player["playedCards"].push(data.Card);
+            log.value += "我出牌:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+          }
+        }else{
+          if(data.Op == CARD_OP["ADD"]){
+            log.value += "玩家:" + data.Pos + " 出牌，牌为:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+          }else if(data.Op == CARD_OP["REMOVE"]){
+            log.value += "玩家:" + data.Pos + " 删除已出牌,牌为:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+          }
+        }
+      },
+      addPengCards: function(nodeid, data) {
+        if (data.SelfPos == myRoomPos){
+          for(i = 0; i < 3; i++){
+            $("#pgCards").append('<option value="' + data.Card + '">' + getCardValue(data.Card) +
+              getCardSuit(data.Card) + '</option>');
+            player["pengCards"].push(data.Card);
+          }
+          log.value += "我碰! 牌为:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " ,出牌者位置:" + data.ChuPos + " \n";
+        }else{
+          log.value += "玩家:" + data.SelfPos + " 碰！牌为:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+        }
+      },
+      addGangCards: function(nodeid, data) {
+        if (data.SelfPos == myRoomPos){
+          if(data.SelfPos == data.ChuPos){
+            for(i = 0; i < 4; i++){
+              $("#pgCards").append('<option value="' + data.Card + '">' + getCardValue(data.Card) + getCardSuit(data.Card) + '</option>');
+              player["gangCards"].push(data.Card);
+            }
+            log.value += "我自摸杠! 牌为:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+          }else{
+            for(i = 0; i < 4; i++){
+              $("#pgCards").append('<option value="' + data.Card + '">' + getCardValue(data.Card) + getCardSuit(data.Card) + '</option>');
+              player["gangCards"].push(data.Card);
+            }
+            log.value += "我杠！牌为:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " ,出牌者位置:" + data.ChuPos + " \n";
+          }
+        }else{ 
+          if(data.SelfPos == data.ChuPos){
+            log.value += "玩家:" + data.SelfPos + " 自摸杠！牌为:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+        }else{
+            log.value += "玩家:" + data.SelfPos + " 杠！" + " 出牌人:" + data.ChuPos + "牌为:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+          }
+        }
+      },
+      setOperationTipCardsNotify: function(nodeid, data) {
+        if(data.Pos == myRoomPos){
+          if(data.Op == OP_TYPE["MJGAME_BASE_OPERATION_PENG"]){
+            log.value += "收到*碰*提示牌:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+            $("#userHandCards option[value='" + data.Card + "']").attr("selected", true);
+          }else if(data.Op == OP_TYPE["MJGAME_BASE_OPERATION_GANG"]){
+            log.value += "收到*杠*提示牌:" + getCardValue(data.Card) + getCardSuit(data.Card) + " 牌值为:" + data.Card + " \n";
+            $("#userHandCards option[value='" + data.Card + "']").attr("selected", true);
+            sendgangCard = Number(data.Card)
+          }
+        }
+      },
+      notifyEachPlayerCards: function(nodeid, data){
+
+      },
+      gameResult: function(nodeid, data)
+      {
+        log.value += "gameResult" + "\n";
+          if(data.hu_pos == myRoomPos){
+            log.value += "i win";
+            for (i = 0; i < data.money.length; i++)
+            {
+              log.value += "pos " + (i+1)+ " money " + data.money[i] + "\n";
+            }
+          }
+          else
+          {
+            log.value += "hupos " + data.hu_pos;
+          }
+          clearResource();
+      },
+      gameResultNotify: function(nodeid, data)
+      {
+          log.value += "gameResultNotify\n";
+          clearResource();
+      },
+      notifyEachPlayerCard: function(nodeid, data)
+      {
+
+      },
+    };
+
+    function clearResource() {
+      $("#userHandCards").empty();
+      $("#pgCards").empty();
+      $("#playedCards").empty();
+      $("#canDoOperations").empty();
+      $("#userFlowerCards").empty();
+      player.cards = [];
+      player.flowerCards = [];
+      player.playedCards = [];
+      player.pengCards = [];
+      player.gangCards = [];
+      player.flowerCount = 0;
+    }
+    function handle_reqCb(protoName, data) {
+
+    }
+    
+    function encryptLoginToken(uid, token, client_key) {
+      // uid + token + hmac
+      var plainText = uid + token;
+      console.log("plainText" + plainText + "  clientkey:" + client_key)
+      var hmac = CryptoJS.MD5(plainText + client_key);
+      return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(hmac))
+    }
+
+    //断开游戏服务器
+    function disconnectGame(nodeid) {
+      wsPool[nodeid].close();
+    }
+
+    function bin2String(array){
+      var result = "";
+      for(var i = 0; i < array.length; ++i){
+        result += (String.fromCharCode(array[i]));
+      }
+      return result;
+    }
+
+    // 进入游戏房间
+    function enterGame() {
+      gsLoginIndex = gsLoginIndex + 1;
+
+      var s = {};
+      s.groupid = 2;
+
+      var p = packerGame("entergameReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[nodeID].send(d);
+    }
+
+    function outCards()
+    {
+        
+    }
+    // 过牌
+    function passCards()
+    {       
+        console.log("passCards")
+        var s = {};
+        s.Operation = 6; // call point
+        s.OperationSeq = 100;
+        var p = packerGame("handleOnPlayerOperation", s).buf;
+        var d = Sproto.array2arraybuffer(p);
+        wsPool[nodeID].send(d);
+        
+    }
+    // 不加倍啥都不干，等chao时
+    function notAdd()
+    {
+    
+    }
+    
+    //换桌子
+    function changeRoom() {
+      var s = {};
+
+      var p = packerGame("changeRoomReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[nodeID].send(d);
+    }
+    
+    //清空日志输出
+    function clearTextArea() {
+      $("#log").val("");
+    }
+
+    //站起/坐下
+    function userStandup(isStandup) {
+      var s = {};
+      s.isstandup = 1;
+      var p = packerGame("userStandupReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+      console.log(s);
+      
+      console.log("userStandup debug");
+      console.log(p);
+      wsPool[nodeID].send(d);
+    }
+    
+    //模拟出牌
+    function playCard(nType) {
+      var s = {};
+      s.Operation = nType;
+      s.OperationSeq = currentOperationSeq;
+      s.RaiseAmount = minRaiseAmount;
+
+      var p = packerGame("playerOperationRes", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+      console.log(s);
+      
+      console.log("playcard debug");
+      console.log(p);
+
+      wsPool[nodeID].send(d);
+      
+      //把所有操作按钮全部禁用
+      document.getElementById("playCard2").disabled = true;
+      document.getElementById("playCard4").disabled = true;
+      document.getElementById("playCard3").disabled = true;
+      document.getElementById("playCard5").disabled = true;
+      document.getElementById("playCard7").disabled = true;
+      
+    }
+    
+    function sendChat() {
+      var s = {};
+      //s.chatrange = 1
+      s.chatcontent = "this is demo chat";
+      var p = packerGame("gamechatReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+      console.log(s);
+
+      spGame.dispatch({buf: p, sz: p.length}, function(protoName, data, response) {
+        console.log("protoName:" + protoName);
+        console.log(data);
+      });
+      
+      console.log("gamechatReq debug");
+      console.log(p);
+      wsPool[nodeID].send(d);
+    }
+    
+    function sendChat2() {
+      var s = {};
+      s.chatrange = 1;
+      s.chatcontent = "this is demo chataaaaaaaaa";
+      var p = packerGame("gamechatReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+      console.log(s);
+      console.log(p);
+      spGame.dispatch({buf: p, sz: p.length}, function(protoName, data, response) {
+        console.log("protoName:" + protoName);
+        console.log(data);
+      });
+      
+      console.log("gamechatReq debug");
+      
+      wsPool[nodeID].send(d);
+    }
+
+    function userReady() {
+      var s = {};
+
+      var p = packerGame("userreadyReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[nodeID].send(d);
+    }
+    
+    var wsPool = {}
+    var isGameHandshakSuccess = {}
+
+    //连接游戏服务器
+    function connectGame(targetNodeId) {
+        var nodeid = targetNodeId;
+        if (gamesrvAddr == "") {
+          alert("尚未登录游戏，wu法直接连接");
+        }
+        var wsGameAddr = "ws://" + gamesrvAddr + "/ws"
+        
+        wsPool[nodeid] = new WebSocket(wsGameAddr);
+
+        wsPool[nodeid].binaryType = "arraybuffer";
+        
+        isGameHandshakSuccess[nodeid] = false;
+
+        wsPool[nodeid].onopen = function(){
+          //游戏socket建立以后要发送握手消息进行验证
+            log.value += "wsGame Connected\n";
+            gsLoginIndex = gsLoginIndex + 1;
+            //base64(uid)@base64(server)#base64(subid):index:base64(hmac)
+            var handshake = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(testUid)) + "@" + CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(nodeName)) + "#" + CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(nodeSubid)) + ":" + gsLoginIndex;
+            var hmac = CryptoJS.MD5(handshake + nodeSecret);
+            handshake = handshake + ":" + CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(hmac));
+            console.log("handshake str:" + handshake);
+            wsPool[nodeid].send(handshake);
+          
+        };
+        wsPool[nodeid].onmessage = function(ev){
+          console.log(ev);
+
+            var d = Sproto.arraybuffer2array(ev.data);
+            console.log(d)
+
+            if (isGameHandshakSuccess[nodeid]) {
+              spGame.dispatch({buf: d, sz: d.length}, function(protoName, data, response) {
+                console.log("protoName:" + protoName + " nodeid:" + nodeid)
+                var f = gsClientPro[protoName];
+                  var r = f(nodeid, data);
+                  if (response) {
+                    var resData = response(r);
+                    var d = Sproto.array2arraybuffer(resData.buf);
+                    wsPool[nodeid].send(d);
+                  }
+                
+                
+              }, function(session, data) {
+                  console.log(data);
+              }
+              );
+            }
+            else {
+              var handShakeResult = bin2String(d);
+              console.log("handShakeResult:" + handShakeResult);
+              if (handShakeResult == "200 OK") {
+                isGameHandshakSuccess[nodeid] = true;
+              }
+              
+            }
+
+            
+        };
+        wsPool[nodeid].onclose = function(ev){
+            log.value += "wsGame Disconnected\n";
+
+            isGameHandshakSuccess[nodeid] = false;
+        };
+
+        wsPool[nodeid].onerror = function(ev){
+         alert("wsGame error");
+        };
+    }
+
+    function loginGame(gameId, nodeId) {
+      nodeID = nodeId;
+      testUid = tUid.options[tUid.selectedIndex].text;
+      testToken = tUid.options[tUid.selectedIndex].value;
+      
+      var tLsAddr = document.getElementById("txtLSAddr");
+      var testLsAddr = tLsAddr.value;
+        
+      
+      wsLogin = new WebSocket(testLsAddr);
+      wsLogin.binaryType = "arraybuffer";
+      
+      var loginClientKey = null;
+
+      wsLogin.onopen = function(){
+            log.value += "LoginServer Connected\n";
+          
+      };
+      wsLogin.onmessage = function(ev){
+          console.log(ev);
+            var d = Sproto.arraybuffer2array(ev.data);
+            //握手消息
+            if (loginClientKey == null) {
+              //wsLogin.close();
+              
+              loginClientKey = bin2String(d);
+              console.log("got login client_key:" + loginClientKey);
+              
+              var signToken = encryptLoginToken(testUid, testToken, loginClientKey);
+              console.log("signed token is:" + signToken);
+              var s = {};
+              s.uid = testUid;
+              s.token = signToken;
+              s.gameid = gameId;
+              s.nodeid = nodeId;
+              loginGameSession = loginGameSession +1;
+
+              var p = packer("loginReq", s, loginGameSession).buf;
+              var d = Sproto.array2arraybuffer(p);
+              console.log(p)
+              console.log(d)
+              wsLogin.send(d);
+              return;
+              
+            }
+            
+            sp.dispatch({buf: d, sz: d.length}, null, function(session, data) {
+              console.log(data);
+              if (session == loginGameSession) {
+                if (data.result == 1) {
+                  log.value +=  "login success! \n";
+                  gamesrvAddr = data.serveraddr;
+                  nodeName = data.nodename;
+                  nodeSecret = data.secret;
+                  nodeSubid = data.subid;
+                  
+                  wsLogin.close();
+                  
+                  if (data.needcutback == true) {
+                    console.log("该用户需要执行掉线重入");
+                  }
+                  
+                  //等待2秒
+                  setTimeout(connectGame(nodeId), 2000);
+                  
+                  
+                }
+                else {
+                  alert("login failed:" + data.message);
+                }
+                
+              }
+              
+            });
+
+            console.log(d)
+        };
+      wsLogin.onclose = function(ev){
+            log.value += "LoginServer Disconnected\n";
+            loginClientKey = null;
+        };
+
+        wsLogin.onerror = function(ev){
+         alert("error");
+        };
+
+    }
+
+    var sp;
+    var spGame;
+    var packer;
+    var packerGame;
+    var str;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', './platform.spb', true);
+    xhr.responseType = 'arraybuffer';
+    xhr.onload = function(e) {
+      var buff = xhr.response;
+      var dataview = new DataView(buff);
+      var schema = new Array();
+      for (var i = 0; i < dataview.byteLength; i++) { 
+        schema[i] = dataview.getUint8(i); 
+      } 
+      sp = Sproto.createNew({buf:schema, sz:schema.length});
+      if (sp == null) {
+        alert("failed to create sproto");
+      }else{
+        sp.host("package");
+        packer = sp.attach();
+        alert("init sproto ok");
+      }
+    };
+    xhr.send();
+
+    var xhrGame = new XMLHttpRequest();
+    xhrGame.open('GET', './majiang.spb', true);
+    xhrGame.responseType = 'arraybuffer';
+    xhrGame.onload = function(e) {
+      var buff = xhrGame.response;
+      var dataview = new DataView(buff);
+      var schema = new Array();
+      for (var i = 0; i < dataview.byteLength; i++) { 
+        schema[i] = dataview.getUint8(i); 
+      } 
+      spGame = Sproto.createNew({buf:schema, sz:schema.length});
+      if (sp == null) {
+        alert("failed to create game sproto");
+      }else{
+        spGame.host("package");
+        packerGame = spGame.attach();
+        alert("init game sproto ok");
+      }
+    };
+    xhrGame.send();
+
+  </script>
+</body>
+</html>

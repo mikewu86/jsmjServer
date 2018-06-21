@@ -1,0 +1,18 @@
+thread = 8
+logger = nil
+root = "../"
+--logger = "demo/skynet.log"
+harbor = 1
+address = "127.0.0.1:2526"
+master = "127.0.0.1:2013"
+start = "main"
+bootstrap = "snlua bootstrap"	-- The service for bootstrap
+standalone = "0.0.0.0:2013"
+debug_port = 8686
+luaservice = "service/?.lua;"..root.."demo/?.lua"
+luapath = root.."lualib/?.lua;".."./lualib/?.lua"
+lualoader = "lualib/loader.lua"
+-- C编写的服务模块路径
+cpath = "./cservice/?.so"
+snax = root.."demo/?.lua;"..root.."demo/roomlogic/?.lua;"
+lua_cpath = root.."luaclib/?.so;".."./luaclib/?.so"

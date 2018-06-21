@@ -1,0 +1,57 @@
+南京麻将项目
+
+
+已经证实skynet服务器是走时间片的。
+如果当前有任务在执行， 是不会处理消息的。以下以消息为证。
+当前任务进入“休眠”状态时， 消息处理开始执行。
+但是也存在风险---如果当前任务进入死循环（当然此情况不存在）时， 消息将不会处理。
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/common/base/BasePlayer.lua:161] BasePlayer:updatePlayerInfo call
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/room.lua:75] room:1 game is start
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/common/base/baseroom.lua:71] broadcastMsg:playerClientNotify
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/common/base/baseroom.lua:71] broadcastMsg:playerClientNotify
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/common/base/baseroom.lua:71] broadcastMsg:playerClientNotify
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:63] start send card.
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:64] step:1
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:79] wait to send card.
+2016-09-28 01:57:47 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/room.lua:28] -- room:setTimeOut --
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:63] start send card.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:64] step:2
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:79] wait to send card.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/room.lua:28] -- room:setTimeOut --
+2016-09-28 01:57:48 [192.168.99.100] [gamemsgagent] DEBUG [./src/service/gamemsgagent.lua:258] recive user userreadyreq:
+2016-09-28 01:57:48 [192.168.99.100] [gameracemgr] DEBUG [./src/service/gameracemgr.lua:294] user ready.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:63] start send card.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:64] step:3
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:79] wait to send card.
+2016-09-28 01:57:48 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/room.lua:28] -- room:setTimeOut --
+2016-09-28 01:57:48 [192.168.99.100] [gamemsgagent] DEBUG [./src/service/gamemsgagent.lua:258] recive user userreadyreq:
+2016-09-28 01:57:48 [192.168.99.100] [gameracemgr] DEBUG [./src/service/gameracemgr.lua:294] user ready.
+2016-09-28 01:57:48 [192.168.99.100] [gamemsgagent] DEBUG [./src/service/gamemsgagent.lua:258] recive user userreadyreq:
+2016-09-28 01:57:48 [192.168.99.100] [gameracemgr] DEBUG [./src/service/gameracemgr.lua:294] user ready.
+2016-09-28 01:57:48 [192.168.99.100] [gamemsgagent] DEBUG [./src/service/gamemsgagent.lua:258] recive user userreadyreq:
+2016-09-28 01:57:48 [192.168.99.100] [gameracemgr] DEBUG [./src/service/gameracemgr.lua:294] user ready.
+2016-09-28 01:57:49 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:63] start send card.
+2016-09-28 01:57:49 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:64] step:4
+2016-09-28 01:57:49 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:49 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:49 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:49 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/game_state/GameBegin.lua:75] send card over.
+2016-09-28 01:57:49 [192.168.99.100] [room] DEBUG [./src/MJGame/nanjingmj/room.lua:28] -- room:setTimeOut --
+2016-09-28 01:57:49 [192.168.99.100] [gamemsgagent] DEBUG [./src/service/gamemsgagent.lua:258] recive user userreadyreq:
+2016-09-28 01:57:49 [192.168.99.100] [gameracemgr] DEBUG [./src/service/gameracemgr.lua:294] user ready.
+2016-09-28 01:57:49 [192.168.99.100] [gamemsgagent] DEBUG [./src/service/gamemsgagent.lua:258] recive user userreadyreq:
+2016-09-28 01:57:49 [192.168.99.100] [gameracemgr] DEBUG [./src/service/gameracemgr.lua:294] user ready.
+2016-09-28 01:57:49 [192.168.99.100] [gamemsgagent] DEBUG [./src/service/gamemsgagent.lua:258] recive user userreadyreq:
+2016-09-28 01:57:49 [192.168.99.100] [gameracemgr] DEBUG [./src/service/gameracemgr.lua:294] user ready.

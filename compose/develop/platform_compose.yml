@@ -1,0 +1,18 @@
+platform:
+  ports:
+  - 5100:5100/tcp
+  - 18001:8003/tcp
+  - 8002:8002/tcp
+  - 28001:7788/tcp
+  environment:
+    NODETYPE: platform
+    nodeid: '2'
+    RUNENV: develop
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.scheduler.affinity:host_label: servername=mgamedevel
+  tty: true
+  image: dockerhub.ucop.io/mobile/mgserver:develop-2017062203
+  volumes:
+  - /data/log/mobilegame:/app/log
+  stdin_open: true

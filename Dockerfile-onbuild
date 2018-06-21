@@ -1,0 +1,51 @@
+FROM dockerhub.ucop.io/public/alpine:3.4
+MAINTAINER Liuq <liuq@uc888.cn>
+
+RUN apk add --update curl \
+    gettext \
+    tzdata \
+    bash && \
+    mkdir -p /app/src && \
+    mkdir -p /app/log
+
+COPY ./Makefile /app/src/Makefile
+COPY ./platform.mk /app/src/platform.mk
+COPY ./lualib-src/ /app/src/lualib-src
+RUN apk add --update --virtual build-dependencies \
+        autoconf \
+        gcc \
+        make \
+        git \
+        python \
+        build-base \
+        readline-dev && \
+    rm -rf /var/cache/apk/* && \
+    cd /app/src && \
+	git clone https://github.com/liubaishui/skynet.git && \
+	cd skynet && \
+    git checkout 85d6c47 && \
+	make linux && \
+    cd /app/src && \
+	make linux && \
+    cd /app/src/skynet/3rd/jemalloc && \
+    make clean && \
+    cd /app/src/skynet/3rd/lua && \
+    make clean && \
+    cd /app/src/skynet && \
+    rm -rf .git && \
+    apk del build-dependencies
+
+ENV TZ=Asia/Shanghai
+
+COPY ./docker/entrypoint.sh /app/src/entrypoint.sh
+COPY ./docker/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/nginx.conf.template /etc/nginx/conf.d/nginx.conf.template
+COPY ./docker/supervisord-app.ini /etc/supervisor.d/supervisord-app.ini
+COPY ./docker/stop-supervisor.sh /usr/bin/stop-supervisor.sh
+COPY ./docker/ssl.cer /etc/nginx/ssl.cer
+COPY ./docker/ssl.key /etc/nginx/ssl.key
+ONBUILD COPY ./src/ /app/src/src
+
+WORKDIR /app/src
+
+ENTRYPOINT ["/app/src/entrypoint.sh"]

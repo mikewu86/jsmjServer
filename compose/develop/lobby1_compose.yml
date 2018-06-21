@@ -1,0 +1,15 @@
+lobby1:
+  ports:
+  - 5200:5200/tcp
+  - 18102:8003/tcp
+  - 8102:8002/tcp
+  - 28201:7788/tcp
+  environment:
+    NODETYPE: lobby
+    nodeid: '48'
+    RUNENV: develop
+  tty: true
+  image: dockerhub.ucop.io/mobile/mgserver:develop-2017062601
+  volumes:
+  - /data/log/mobilegame:/app/log
+  stdin_open: true

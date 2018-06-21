@@ -1,0 +1,16 @@
+maanshanmj:
+  ports:
+  - 5104:5104/tcp
+  - 18004:8003/tcp
+  - 28004:7788/tcp
+  environment:
+    NODETYPE: MJGame/maanshanmj
+    nodeid: '34'
+    RUNENV: develop
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: dockerhub.ucop.io/mobile/mgserver:develop-2017062605
+  volumes:
+  - /data/log/mobilegame:/app/log
+  stdin_open: true

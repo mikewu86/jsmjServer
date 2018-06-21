@@ -1,0 +1,125 @@
+.package {
+	type 0 : integer
+	session 1 : integer
+}
+
+handshake 1 {
+        response {
+                msg 0  : string
+        }
+}
+
+login 2 {
+        request {
+                uid 0 : string
+                token 1 : string
+                gameid 2 : string
+                nodeid 3 : string
+        }
+        response {
+                result 0 : integer
+                message 1 : string
+                secret 2 : string
+                serveraddr 3 : string
+                nodename 4 : string
+                subid 5 : string
+        }
+}
+
+entergame 5 {
+        request {
+                groupid 0 : integer
+        }
+}
+
+userreadyreq 6 {
+        request {
+
+        }
+}
+
+changeRoomReq 7 {
+        request {
+                
+        }
+}
+
+gamecs 10 {
+        request {
+                data 0 : *integer
+        }
+}
+
+
+.package {
+        type 0 : integer
+        session 1 : integer
+}
+
+
+
+heartbeatcs 12 {
+        request {
+                ts 0 : string
+        }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+heartbeatsc 101 {
+        request {
+                ts 0 : string
+        }
+}
+
+gamesc 102 {
+        request {
+                data 0 : *integer
+        }
+}
+
+entergamenotify 103 {
+        request {
+                ret 0 : boolean
+                msg 1 : string
+        }
+}
+
+enterroomres 104 {
+        request {
+                ret 0 : boolean
+                roomid 1 : integer
+
+        }
+}
+
+enterroomnotify 105 {
+        request {
+                uid 0 : integer
+                entertype 1 : integer
+        }
+}
+
+userreadynotify 106 {
+        request {
+                uid 0 : integer
+        }        
+}
+
+roomstatunotify 107 {
+        request {
+                roomid 0 : integer
+                status 1 : integer
+        }
+}

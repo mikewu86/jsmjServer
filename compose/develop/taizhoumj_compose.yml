@@ -1,0 +1,16 @@
+taizhoumj:
+  ports:
+  - 5114:5114/tcp
+  - 28014:7788/tcp
+  - 18014:8003/tcp
+  environment:
+    NODETYPE: MJGame/taizhoumj
+    RUNENV: develop
+    nodeid: '46'
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: dockerhub.ucop.io/mobile/mgserver:develop-2017070305
+  volumes:
+  - /data/log/mobilegame:/app/log
+  stdin_open: true

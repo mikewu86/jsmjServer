@@ -1,0 +1,16 @@
+chongfumj:
+  ports:
+  - 5108:5108/tcp
+  - 18008:8003/tcp
+  - 28008:7788/tcp
+  environment:
+    NODETYPE: MJGame/chongfumj
+    nodeid: '38'
+    RUNENV: develop
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: dockerhub.ucop.io/mobile/mgserver:develop-5dc912
+  volumes:
+  - /data/log/mobilegame:/app/log
+  stdin_open: true

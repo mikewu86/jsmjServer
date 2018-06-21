@@ -1,0 +1,34 @@
+.package {
+    type 0 : integer
+    session 1 : integer
+}
+
+heartbeatReq 2 {
+        request {
+                ts 0 : string
+        }
+}
+
+heartbeatRes 3 {
+        request {
+                ts 0 : string
+        }
+}
+
+
+loginReq 101 {
+        request {
+                uid 0 : integer
+                token 1 : string
+                gameid 2 : integer
+                nodeid 3 : integer
+        }
+        response {
+                result 0 : integer
+                message 1 : string
+                secret 2 : string
+                serveraddr 3 : string
+                nodename 4 : string
+                subid 5 : string
+        }
+}

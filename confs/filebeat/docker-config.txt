@@ -1,0 +1,9 @@
+filebeat2:
+  image: prima/filebeat:latest
+  volumes:
+  - /data/filebeat:/etc/filebeat
+  - /data/log/mobilegame:/var/log/mobilegame:ro
+  - /data/filebeat/filebeat.yml:/filebeat.yml
+  stdin_open: true
+logshipper:
+  在rancher中建立外部服务，阿里云环境指向 172.16.18.19  非阿里云环境指向 114.55.18.39

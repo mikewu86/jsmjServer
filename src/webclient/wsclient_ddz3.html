@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>skynet WebSocket example</title>
+  <script type="text/javascript" src="./zepto.min.js"></script>
+  <script type="text/javascript" src="./wxutils.js"></script>
+  <script type="text/javascript" src="./sproto.js"></script>
+  <script src="./crypto-js/rollups/md5.js"></script>
+  <script src="./crypto-js/rollups/hmac-md5.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha1.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha3.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha224.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha256.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha384.js"></script>
+  <script src="./crypto-js/rollups/hmac-sha512.js"></script>
+  <script src="./crypto-js/components/enc-base64-min.js"></script>
+  <script src="http://cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script>
+  <meta charset="UTF-8" />
+
+</head>
+<body>
+  <p>登录服务器地址：<input type="text" id="txtLSAddr" value="ws://192.168.99.100:8002/ws"/></p>
+<p>用户id: 
+  <select id="txtUid">
+    <option value="0138abdf8eae6545cee900e5e5ac9dfd">2923</option>
+    <option value="15b1d785e9e2e3728b234b89569793e5">2924</option>
+    <option value="29cb7bf72eb44c33115a6d25c55db825">2925</option>
+    <option value="bde33f039b192bde62592e25601c5fcc">2926</option>
+    <option value="583aa412cc0ef58120b5019e99375230">2927</option>
+    <option value="10efcbd9d98e5b89dae88d16870804fa">2928</option>
+    <option value="6fa80ccc57669c1dfa1f9855465d30f3">2806</option>
+  </select>
+  
+  <input type="checkbox" name="chkAuto" id="chkAuto" value="自动应答" /> 自动应答
+</p>
+<p>分值:  
+  <select id="Score">
+    <option value="0">1</option>
+    <option value="1">2</option>
+    <option value="2">3</option>
+  </select>
+</p>
+<textarea id="log" style="width: 100%; height: 200px"></textarea><br />
+
+  <input type="button" value="登录到platform" id="btnSend" onclick="javascript:loginGame('0', '0');"/>
+  <input type="button" value="登录到游戏" id="loginGame" onclick="javascript:loginGame('1', '1');"/>
+
+  <input type="button" value="进入游戏" id="enterGame" onclick="javascript:enterGame();"/>
+  <input type="button" value="游戏中举手" id="userReady" onclick="javascript:userReady();"/>
+  <input type="button" value="换桌子" id="changeRoom" onclick="javascript:changeRoom();"/>
+ 
+  <input type="button" value="叫分" id="callPoint" onclick="javascript:callPoint();"/>
+  <input type="button" value="抢地主" id="grabLandlord" onclick="javascript:grabLandlord();"/>
+  <input type="button" value="不抢" id="notGrab" onclick="javascript:notGrab();"/>
+  <input type="button" value="加倍" id="addDouble" onclick="javascript:addDouble();"/>
+  <input type="button" value="不加" id="notAdd" onclick="javascript:notAdd();"/>
+  <input type="button" value="出牌" id="outCards" onclick="javascript:outCards();"/>
+  <input type="button" value="过牌" id="passCards" onclick="javascript:passCards();"/>
+
+<form id="playDdz3Cards">
+<select id="userHandCards" multiple="multiple" size="20"></select>
+<input type="button" id="sendCards" value="出牌"/>
+</form>
+
+  <script>
+    // 扑克牌
+    // 花色
+    var SUIT = {
+        "SUIT_NONE"    : 0 ,
+        "SUIT_SPADE"   : 1 ,
+        "SUIT_HEART"   : 2 ,
+        "SUIT_CLUB"    : 3 ,
+        "SUIT_DIAMOND" : 4 ,
+        "SUIT_JOKER"   : 5 ,
+    };
+    // 牌值
+    var VALUE = {
+        "VALUE_NONE"  : 0 ,
+        "VALUE_3"     : 1 ,
+        "VALUE_4"     : 2 ,
+        "VALUE_5"     : 3 ,
+        "VALUE_6"     : 4 ,
+        "VALUE_7"     : 5 ,
+        "VALUE_8"     : 6 ,
+        "VALUE_9"     : 7 ,
+        "VALUE_10"    : 8 ,
+        "VALUE_J"     : 9 ,
+        "VALUE_Q"     : 10 ,
+        "VALUE_K"     : 11 ,
+        "VALUE_1"     : 12 ,
+        "VALUE_2"     : 13 ,
+        "VALUE_BLACK" : 14 ,
+        "VALUE_RED"   : 15 ,
+    };
+    // 花色字符串
+    var SUIT_STR = {};
+    SUIT_STR[SUIT.SUIT_NONE]    = "空";
+    SUIT_STR[SUIT.SUIT_SPADE]   = "黑桃";
+    SUIT_STR[SUIT.SUIT_HEART]   = "红桃";
+    SUIT_STR[SUIT.SUIT_CLUB]    = "梅花";
+    SUIT_STR[SUIT.SUIT_DIAMOND] = "方块";
+    SUIT_STR[SUIT.SUIT_JOKER]   = "王";
+    // 牌值字符串
+    var VALUE_STR = {};
+    VALUE_STR[VALUE.VALUE_NONE]  = "0";
+    VALUE_STR[VALUE.VALUE_3]     = "3";
+    VALUE_STR[VALUE.VALUE_4]     = "4";
+    VALUE_STR[VALUE.VALUE_5]     = "5";
+    VALUE_STR[VALUE.VALUE_6]     = "6";
+    VALUE_STR[VALUE.VALUE_7]     = "7";
+    VALUE_STR[VALUE.VALUE_8]     = "8";
+    VALUE_STR[VALUE.VALUE_9]     = "9";
+    VALUE_STR[VALUE.VALUE_10]    = "10";
+    VALUE_STR[VALUE.VALUE_J]     = "J";
+    VALUE_STR[VALUE.VALUE_Q]     = "Q";
+    VALUE_STR[VALUE.VALUE_K]     = "K";
+    VALUE_STR[VALUE.VALUE_1]     = "A";
+    VALUE_STR[VALUE.VALUE_2]     = "2";
+    VALUE_STR[VALUE.VALUE_BLACK] = "B";
+    VALUE_STR[VALUE.VALUE_RED]   = "R";
+    // 玩家操作
+    var PokerDeskLogic = {
+    // 叫分操作
+    "OPERATION_CALLPOINTS"        : 1 ,
+    "OPERATION_CALLPOINTS_PASS"   : 2 ,
+    // 抢地主
+    "OPERATION_GRABLANDLORD"      : 3 ,
+    "OPERATION_GRABLANDLORD_PASS" : 4 ,
+    // 出牌
+    "OPERATION_OUTCARD"           : 5 ,
+    "OPERATION_OUTCARD_PASS"      : 6 ,
+    // 加倍分数
+    "OPERATION_DOUBLESCORE"       : 7 ,
+    };
+    
+    var cardBitMask = Math.pow(2,4);
+
+    function getCardSuit(card){
+        var suit = Math.floor(card / cardBitMask);
+        return SUIT_STR[suit]
+    }
+
+    function getCardValue(card){
+        var suit = Math.floor(card / cardBitMask);
+        var value = card - suit * cardBitMask;
+        return VALUE_STR[value]
+    }
+
+    function getCardSuitByte(card){
+      var suit = Math.floor(card / cardBitMask);
+      return suit
+    }
+
+    function getCardValueByte(card){
+      var suit = Math.floor(card / cardBitMask)
+      var value = card - suit * cardBitMask
+      return value
+    }
+    /*
+    // 测试扑克牌
+    var cardSuit = getCardSuit(27);
+    var cardValue = getCardValue(27);
+    console.log(cardSuit);
+    console.log(cardValue);
+    */
+
+    // 数组对象删除元素方法
+    Array.prototype.indexOf = function(val) {
+      for(var i = 0; i < this.length; i++){
+        if(this[i] == val) return i;
+      }
+      return -1;
+    };
+
+    Array.prototype.remove = function(val) {
+      var index = this.indexOf(val);
+        if (index > -1) {
+          this.splice(index, 1);
+        }
+    };
+
+    $("#sendCards").click(function(){
+      var checkText = $("#userHandCards").find("option:selected").text();
+      var checkValue = $("#userHandCards").val();
+      log.value += "出牌:" + checkText + " \n" + "牌值:" + checkValue + "\n";
+
+      sendCards(checkValue);
+    });
+
+    function sendCards(cards){
+      var playerOperation = {};
+      playerOperation.Operation = PokerDeskLogic["OPERATION_OUTCARD"];
+      playerOperation.OperationSeq = 300;
+      playerOperation.Cards = cards;
+      console.log("send cards to server:" + cards);
+      var p = packerGame("handleOnPlayerOperation", playerOperation).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[1].send(d);
+    }
+  // Create Base64 Object
+
+// 玩家数据
+    var player = {};
+
+    var log = document.getElementById("log");
+    var tUid = document.getElementById("txtUid");
+    var tToken = document.getElementById("txtToken");
+    var cAuto = document.getElementById("chkAuto");
+    var reqSession = 0;
+    var loginGameSession = 0;
+    var gamesrvAddr = "";
+    var ws;
+
+    var wsLogin;
+    var wsGame;
+    var gsLoginIndex = 0;
+    var nodeName = "";
+    var nodeSecret = "";
+    var nodeSubid = "";
+
+    var testUid = "2923";
+    var testToken = "";
+    var client_key = null;
+    
+    var currentOperationSeq = 0;
+    
+    var myRoomPos = 0;
+	//var myCards=new Array()
+    var minRaiseAmount = 0;
+    var bLandLord = false
+    var gsClientPro = {
+      heartbeatReq: function(nodeid, data) {
+        //console.log("收到了服务器发送的心跳包:" + data.ts);
+        var s = {};
+        s.ts = data.ts;
+      
+        var p = packer("heartbeatRes", s).buf;
+        var d = Sproto.array2arraybuffer(p);
+        wsPool[nodeid].send(d);
+      },
+      roomstatuNotify: function(nodeid, data) {
+        console.log("收到了服务器发送的房间状态改变消息 room:" + data.roomid + "   status:" + data.status);
+      },
+      playerOperationNotify: function(nodeid, data) {
+        console.log("recive user playerOperationNotify, Pos:" + data.Pos);
+        console.log(data);
+        log.value += "位置:" + data.Pos + "  操作:" + data.Operation + "! \n";
+      },
+      playerOperationReq: function(nodeid, data) {
+        console.log("recive user playerOperationReq, Pos:" + data.Pos);
+        console.log(data);
+        currentOperationSeq = data.OperationSeq;
+        //是请求自己的
+        if (data.Pos == myRoomPos) {
+          for(var i = 0; i < data.Operation.length; i++) {
+            var conName = "playCard" + data.Operation[i];
+            var btnOP = document.getElementById(conName);
+            btnOP.disabled = false;
+            //如果允许加注，设置最小加注变量
+            if (data.Operation[i] == 5) {
+              minRaiseAmount = data.MinRaiseAmount;
+            }
+          }
+          
+          //设置了自动应答
+          if (cAuto.checked == true) {
+            //跟注
+            if (data.Operation.indexOf(2) >= 0) {
+              playCard(2);
+              return;
+            }
+            
+            if (data.Operation.indexOf(4) >= 0) {
+              playCard(4);
+              return;
+            }
+          }
+        }
+      },
+      playerChipsCountNotify: function(nodeid, data) {
+        console.log("recive user playerChipsCountNotify.");
+        console.log(data);
+      },
+      playerBetCountNotify: function(nodeid, data) {
+        console.log("recive user playerBetCountNotify.");
+        console.log(data);
+      },
+      addDeskCardNotify: function(nodeid, data) {
+        console.log("recive user addDeskCardNotify.");
+        console.log(data);
+        
+        log.value += "发公共牌:" + data.Cards.join(", ") + " \n";
+      },
+      enterroomNotify: function(nodeid, data) {
+        console.log("recive user enterroomNotify.");
+        console.log(data);
+        log.value += "uid:" + data.uid + "  enterroom! \n";
+        if (testUid == data.uid) {
+          myRoomPos = data.pos;
+        }
+      },
+	  	  // 响应服务器操作--关于牌的后期处理
+	  addHandCardNotifyReq:function(nodeid, data)
+	  {
+		console.log("addHandCardNotifyReq");
+		log.value += "pos "+ data.Pos +"\n";
+		log.value += "得到了手中牌:" + data.Cards.join(", ") + " \n";
+	    //log.value = "";
+		//myCards.contact(data.Cards);
+	  },
+	  baseCardNotify: function(nodeid, data)
+	  {		
+		console.log("baseCardNotify");
+	    log.value += "landLord pos "+ data.Pos +"\n";
+	  },
+	  playerCallPointReq: function(nodeid, data)
+	  {
+		console.log("playerCallPointReq");
+		if (myRoomPos == data.Pos)
+		{
+			console.log("now, 现在我要叫分了");
+			log.value += "now, 现在我要叫分了" + " \n";
+		}
+	  },
+	  playerGrabLandLordReq: function(nodeid, data)
+	  {
+		console.log("now, 现在我要抢地主了");
+		log.value += "now, 现在我要抢地主了" + " \n";
+	  },
+	  playerDoubleScoreReq:function(nodeid, data)
+	  {
+			console.log("now, 现在我要加倍了");
+			log.value += "now, 现在我要加倍了" + " \n";
+	  },
+	  playerPlayCardReq:function(nodeid, data)
+	  {
+		if (myRoomPos == data.Pos)
+		{
+			console.log("now, 现在我要出牌了");
+			log.value += "now, 现在我要出牌了" + " \n";
+		}
+	  },
+	  playerOutCardsRes_All: function(nodeid, data)
+	  {
+		if (myRoomPos == data.Pos)
+		{
+			console.log("now, 我出的牌是 ");
+			log.value += "now, 我出的牌是 ";
+			log.value += data.Cards.join(", ") + "\n";
+      for(var i = 0; i < data.Cards.length; i++){
+        player["cards"].remove(data.Cards[i]);
+        player["cardsCount"] = player["cards"].length;
+      }
+      log.value += "player手中剩余的牌:" + player["cards"] + " \n";
+      log.value += "player手中牌剩余数量:" + player["cardsCount"] + " \n";
+      console.log(player["cards"]);
+      console.log(player["cardsCount"]);
+
+      // 清空select列表，重新添加
+      $("#userHandCards").empty();
+      for(var i = 0;i < player["cards"].length; i++){
+        $("#userHandCards").append('<option value="' + player["cards"][i] + '">' + getCardSuit(player["cards"][i]) + getCardValue(player["cards"][i]) + '</option>');
+      }
+		}
+		else
+		{
+			console.log("刚刚有人出牌了");
+			log.value += "刚刚有人出牌了 ";
+			log.value += "pos "+ data.Pos + " ";
+			log.value += "出的牌是 "+data.Cards.join(", ") + "\n";
+		}
+	  },
+	  playerPassCardRes_All: function(nodeid, data)
+	  {
+		if (myRoomPos == data.Pos)
+		{
+			console.log("now, 我过牌 ");
+			log.value += "now, 我过牌 " + " \n";
+		}
+		else
+		{
+			console.log("谁过牌了： ");
+			log.value += "谁过牌了： ";
+			log.value += "pos "+ data.Pos +"\n";
+		}
+	  },
+	  gameResult_All:function(nodeid, data)
+	  {
+		if (myRoomPos == data.Pos)
+		{
+			if (data.WinMoney > 0 )
+			{
+				console.log("我赢了，yes ");
+				log.value += "我赢了，yes ";
+			}
+			else
+			{
+				console.log("我输了，no ");
+				log.value += "我输了，no ";　
+			}
+		}
+		log.value += data.WinMoney + "\n";
+	  },
+      leaveroomNotify: function(nodeid, data) {
+        console.log("recive user leaveroomNotify.");
+        log.value += "uid:" + data.uid + "  leaveroom! \n";
+        console.log(data);
+      },
+      userreadyNotify: function(nodeid, data) {
+        console.log("recive user userreadyNotify.");
+        log.value += "uid:" + data.uid + "  is ready! \n";
+        console.log(data);
+      },
+      roundResultNotify: function(nodeid, data) {
+        console.log("recive user roundResultNotify.");
+        log.value += "本轮结束了! \n";
+        console.log(data);
+      },
+      setHandCardNotify: function(nodeid, data) {
+        console.log("recive user setHandCardNotify.");
+        log.value += "开牌了! \n";
+        console.log(data);
+      },
+      userStandupRes: function(nodeid, data) {
+        console.log("recive user userStandupRes.");
+        console.log(data);
+      },
+      userStandupNotify: function(nodeid, data) {
+        console.log("recive user userStandupNotify.");
+        log.value += "有玩家站起/坐下了! \n";
+        console.log(data);
+      },
+      enterroomRes: function(nodeid, data) {
+        console.log("recive user enterroomRes.");
+        log.value += "进入房间成功，同时返回当前房间的玩家信息! \n";
+        console.log(data);
+      },
+	  
+      gamechatNotify: function(nodeid, data) {
+        console.log("recive user gamechatNotify.");
+        log.value += "接收到聊天广播:" + data.content  +" \n";
+        console.log(data);
+      },
+      gameinfoNotify: function(nodeid, data) {
+        console.log("recive user gameinfoNotify.");
+        log.value += "本局庄家在:" + data.DealerPos  +"位置 \n";
+        console.log(data);
+      },
+      roundPotinfoNotify: function(nodeid, data) {
+        console.log("recive user roundPotinfoNotify.");
+        log.value += "得到最新的彩池信息 \n";
+        console.log(data);
+      },
+	    addHandCardNotifyReq: function(nodeid, data) {
+        console.log("recive user addHandCardNotifyReq, Pos:" + data.Pos);
+        console.log(data);
+		myRoomPos = data.Pos
+        log.value += "得到了手中牌:" + data.Cards.join(", ") + " \n";
+		
+        player["cards"] = data.Cards;
+        player["cardsCount"] = data.Cards.length;
+        log.value += "player手中的牌:" + player["cards"] + " \n";
+        log.value += "player手中牌剩余数量:" + player["cardsCount"] + " \n";
+        console.log(player["cards"]);
+        console.log(player["cardsCount"]);
+        for(i=0;i<data.Cards.length;i++) {
+          $("#userHandCards").append('<option value="' + data.Cards[i] + '">' + getCardSuit(data.Cards[i]) + getCardValue(data.Cards[i]) + '</option>');
+        }
+      },
+      baseCardNotify: function(nodeid, data) {
+        console.log("recive landlord baseCardNotify, Pos:" + data.Pos);
+        console.log(data);
+        if (data.Pos == myRoomPos) {
+          log.value += "收到发给地主的底牌:" + data.Cards.join(", ") + " \n";
+          player["cardsCount"] = player["cards"].length + data.Cards.length;
+          player["cards"] = player["cards"].concat(data.Cards);
+          log.value += "地主此时手牌为:" + player["cards"].join(", ") + " \n";
+          //收到底牌后重新排序
+          player["cards"].sort(function(a,b){
+            if(getCardValueByte(a) == getCardValueByte(b)){
+              return getCardSuitByte(a) - getCardSuitByte(b)
+            }else{
+              return getCardValueByte(a) - getCardValueByte(b)
+              }
+          })
+          //清空select项，重新添加
+          $("#userHandCards").empty();
+          for(i = 0; i < player["cards"].length; i++){
+            $("#userHandCards").append('<option value="' + player["cards"][i] + '">' + getCardSuit(player["cards"][i]) + getCardValue(player["cards"][i]) + '</option>');
+          }
+        }
+      },
+    };
+
+    function handle_reqCb(protoName, data) {
+
+    }
+    
+    function encryptLoginToken(uid, token, client_key) {
+      // uid + token + hmac
+      var plainText = uid + token;
+      console.log("plainText" + plainText + "  clientkey:" + client_key)
+      var hmac = CryptoJS.MD5(plainText + client_key);
+      return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(hmac))
+    }
+
+    //断开游戏服务器
+    function disconnectGame(nodeid) {
+      wsPool[nodeid].close();
+    }
+
+    function bin2String(array){
+      var result = "";
+      for(var i = 0; i < array.length; ++i){
+        result += (String.fromCharCode(array[i]));
+      }
+      return result;
+    }
+
+    // 进入游戏房间
+    function enterGame() {
+      gsLoginIndex = gsLoginIndex + 1;
+
+      var s = {};
+      s.groupid = 1;
+
+      var p = packerGame("entergameReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[1].send(d);
+    }
+
+	function outCards()
+	{
+		
+	}
+	// 过牌
+	function passCards()
+	{		
+		console.log("passCards")
+		var s = {};
+		s.Operation = 6; // call point
+		s.OperationSeq = 100;
+		var p = packerGame("handleOnPlayerOperation", s).buf;
+		var d = Sproto.array2arraybuffer(p);
+		wsPool[1].send(d);
+		
+	}
+	// 不加倍啥都不干，等超时
+	function notAdd()
+	{
+	
+	}
+	// 加倍
+	function addDouble()
+	{
+		console.log("addDouble")
+		var s = {};
+		s.Operation = 7; // call point
+		s.OperationSeq = 100;
+		var p = packerGame("handleOnPlayerOperation", s).buf;
+		var d = Sproto.array2arraybuffer(p);
+		wsPool[1].send(d);
+	}
+
+	// 叫分
+    function callPoint() {
+	  console.log(" i callPoint ");
+	  var cards = new Array();
+	  cards[0] = 0
+	  var s = {};
+      s.Operation = 1; // call point
+	  s.OperationSeq = 100;
+	  var tScore= document.getElementById("Score");
+	  var siScore = tScore.options[tScore.selectedIndex].text;
+	  s.Param = parseInt(siScore);
+	  s.Cards = cards;
+	  console.log(siScore);
+      var p = packerGame("handleOnPlayerOperation", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[1].send(d);
+	}
+	//抢地主
+	function grabLandlord() {
+		console.log("grabLandlord")
+		log.value += "grabLandlord"
+		var s = {};
+		s.Operation  = 3;
+		s.OperationSeq = 100;
+		s.Param = 0;
+		var p = packerGame("handleOnPlayerOperation", s).buf;
+		var d = Sproto.array2arraybuffer(p);
+
+        wsPool[1].send(d);
+	}
+	//抢地主过
+	function notGrab()
+	{
+		console.log("notGrab")
+		log.value += "notGrab"
+		var s = {};
+		s.Operation  = 4;
+		s.OperationSeq = 100;
+		var p = packerGame("handleOnPlayerOperation", s).buf;
+		var d = Sproto.array2arraybuffer(p);
+
+        wsPool[1].send(d);
+	}
+	
+    //换桌子
+    function changeRoom() {
+      var s = {};
+
+      var p = packerGame("changeRoomReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[1].send(d);
+    }
+    
+    //站起/坐下
+    function userStandup(isStandup) {
+      var s = {};
+      s.isstandup = 1;
+      var p = packerGame("userStandupReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+      console.log(s);
+      
+      console.log("userStandup debug");
+      console.log(p);
+      wsPool[1].send(d);
+    }
+    
+    //模拟出牌
+    function playCard(nType) {
+      var s = {};
+      s.Operation = nType;
+      s.OperationSeq = currentOperationSeq;
+      s.RaiseAmount = minRaiseAmount;
+
+      var p = packerGame("playerOperationRes", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+      console.log(s);
+      
+      console.log("playcard debug");
+      console.log(p);
+
+      wsPool[1].send(d);
+      
+      //把所有操作按钮全部禁用
+      document.getElementById("playCard2").disabled = true;
+      document.getElementById("playCard4").disabled = true;
+      document.getElementById("playCard3").disabled = true;
+      document.getElementById("playCard5").disabled = true;
+      document.getElementById("playCard7").disabled = true;
+      
+    }
+    
+    function sendChat() {
+      var s = {};
+      //s.chatrange = 1
+      s.chatcontent = "this is demo chat";
+      var p = packerGame("gamechatReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+console.log(s);
+
+      spGame.dispatch({buf: p, sz: p.length}, function(protoName, data, response) {
+        console.log("protoName:" + protoName);
+        console.log(data);
+      });
+      
+      console.log("gamechatReq debug");
+      console.log(p);
+      wsPool[1].send(d);
+    }
+    
+    function sendChat2() {
+      var s = {};
+      s.chatrange = 1;
+      s.chatcontent = "this is demo chataaaaaaaaa";
+      var p = packerGame("gamechatReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+console.log(s);
+      console.log(p);
+      spGame.dispatch({buf: p, sz: p.length}, function(protoName, data, response) {
+        console.log("protoName:" + protoName);
+        console.log(data);
+      });
+      
+      console.log("gamechatReq debug");
+      
+      wsPool[1].send(d);
+    }
+
+    function userReady() {
+      var s = {};
+
+      var p = packerGame("userreadyReq", s).buf;
+      var d = Sproto.array2arraybuffer(p);
+
+      wsPool[1].send(d);
+    }
+    
+    var wsPool = {}
+    var isGameHandshakSuccess = {}
+
+    //连接游戏服务器
+    function connectGame(targetNodeId) {
+        var nodeid = targetNodeId;
+        if (gamesrvAddr == "") {
+          alert("尚未登录游戏，无法直接连接");
+        }
+        var wsGameAddr = "ws://" + gamesrvAddr + "/ws"
+        
+        wsPool[nodeid] = new WebSocket(wsGameAddr);
+
+        wsPool[nodeid].binaryType = "arraybuffer";
+        
+        isGameHandshakSuccess[nodeid] = false;
+
+        wsPool[nodeid].onopen = function(){
+          //游戏socket建立以后要发送握手消息进行验证
+            log.value += "wsGame Connected\n";
+            gsLoginIndex = gsLoginIndex + 1;
+            //base64(uid)@base64(server)#base64(subid):index:base64(hmac)
+            var handshake = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(testUid)) + "@" + CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(nodeName)) + "#" + CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(nodeSubid)) + ":" + gsLoginIndex;
+            var hmac = CryptoJS.MD5(handshake + nodeSecret);
+            handshake = handshake + ":" + CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(hmac));
+            console.log("handshake str:" + handshake);
+            wsPool[nodeid].send(handshake);
+          
+        };
+        wsPool[nodeid].onmessage = function(ev){
+          console.log(ev);
+
+            var d = Sproto.arraybuffer2array(ev.data);
+            console.log(d)
+
+            if (isGameHandshakSuccess[nodeid]) {
+              spGame.dispatch({buf: d, sz: d.length}, function(protoName, data, response) {
+                console.log("protoName:" + protoName + " nodeid:" + nodeid)
+                var f = gsClientPro[protoName];
+                  var r = f(nodeid, data);
+                  if (response) {
+                    var resData = response(r);
+                    var d = Sproto.array2arraybuffer(resData.buf);
+                    wsPool[nodeid].send(d);
+                  }
+                
+                
+              }, function(session, data) {
+                  console.log(data);
+              }
+              );
+            }
+            else {
+              var handShakeResult = bin2String(d);
+              console.log("handShakeResult:" + handShakeResult);
+              if (handShakeResult == "200 OK") {
+                isGameHandshakSuccess[nodeid] = true;
+              }
+              
+            }
+
+            
+        };
+        wsPool[nodeid].onclose = function(ev){
+            log.value += "wsGame Disconnected\n";
+
+            isGameHandshakSuccess[nodeid] = false;
+        };
+
+        wsPool[nodeid].onerror = function(ev){
+         alert("wsGame error");
+        };
+    }
+
+    function loginGame(gameId, nodeId) {
+      
+      testUid = tUid.options[tUid.selectedIndex].text;
+      testToken = tUid.options[tUid.selectedIndex].value;
+      
+      var tLsAddr = document.getElementById("txtLSAddr");
+      var testLsAddr = tLsAddr.value;
+        
+      
+      wsLogin = new WebSocket(testLsAddr);
+      wsLogin.binaryType = "arraybuffer";
+      
+      var loginClientKey = null;
+
+      wsLogin.onopen = function(){
+            log.value += "LoginServer Connected\n";
+          
+      };
+      wsLogin.onmessage = function(ev){
+          console.log(ev);
+            var d = Sproto.arraybuffer2array(ev.data);
+            //握手消息
+            if (loginClientKey == null) {
+              //wsLogin.close();
+              
+              loginClientKey = bin2String(d);
+              console.log("got login client_key:" + loginClientKey);
+              
+              var signToken = encryptLoginToken(testUid, testToken, loginClientKey);
+              console.log("signed token is:" + signToken);
+              var s = {};
+              s.uid = testUid;
+              s.token = signToken;
+              s.gameid = gameId;
+              s.nodeid = nodeId;
+              loginGameSession = loginGameSession +1;
+
+              var p = packer("loginReq", s, loginGameSession).buf;
+              var d = Sproto.array2arraybuffer(p);
+              console.log(p)
+              console.log(d)
+              wsLogin.send(d);
+              return;
+              
+            }
+            
+            sp.dispatch({buf: d, sz: d.length}, null, function(session, data) {
+              console.log(data);
+              if (session == loginGameSession) {
+                if (data.result == 1) {
+                  log.value +=  "login success! \n";
+                  gamesrvAddr = data.serveraddr;
+                  nodeName = data.nodename;
+                  nodeSecret = data.secret;
+                  nodeSubid = data.subid;
+                  
+                  wsLogin.close();
+                  
+                  if (data.needcutback == true) {
+                    console.log("该用户需要执行掉线重入");
+                  }
+                  
+                  //等待2秒
+                  setTimeout(connectGame(nodeId), 2000);
+                  
+                  
+                }
+                else {
+                  alert("login failed:" + data.message);
+                }
+                
+              }
+              
+            });
+
+            console.log(d)
+        };
+      wsLogin.onclose = function(ev){
+            log.value += "LoginServer Disconnected\n";
+            loginClientKey = null;
+        };
+
+        wsLogin.onerror = function(ev){
+         alert("error");
+        };
+
+    }
+
+    var sp;
+    var spGame;
+    var packer;
+    var packerGame;
+var str;
+var xhr = new XMLHttpRequest();
+xhr.open('GET', './platform.spb', true);
+xhr.responseType = 'arraybuffer';
+xhr.onload = function(e) {
+    var buff = xhr.response;
+    var dataview = new DataView(buff);
+    var schema = new Array();
+    for (var i = 0; i < dataview.byteLength; i++) { 
+        schema[i] = dataview.getUint8(i); 
+    } 
+    sp = Sproto.createNew({buf:schema, sz:schema.length});
+    if (sp == null) {
+        alert("failed to create sproto");
+    }
+    else {
+      sp.host("package");
+      packer = sp.attach();
+      alert("init sproto ok");
+    }
+};
+xhr.send();
+
+var xhrGame = new XMLHttpRequest();
+xhrGame.open('GET', './ddz3.spb', true);
+xhrGame.responseType = 'arraybuffer';
+xhrGame.onload = function(e) {
+    var buff = xhrGame.response;
+    var dataview = new DataView(buff);
+    var schema = new Array();
+    for (var i = 0; i < dataview.byteLength; i++) { 
+        schema[i] = dataview.getUint8(i); 
+    } 
+    spGame = Sproto.createNew({buf:schema, sz:schema.length});
+    if (sp == null) {
+        alert("failed to create game sproto");
+    }
+    else {
+      spGame.host("package");
+      packerGame = spGame.attach();
+      alert("init game sproto ok");
+    }
+};
+xhrGame.send();
+
+
+
+  </script>
+</body>
+</html>

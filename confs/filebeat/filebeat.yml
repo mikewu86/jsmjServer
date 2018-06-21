@@ -1,0 +1,56 @@
+############################# Filebeat ######################################
+filebeat:
+  # List of prospectors to fetch data.
+  prospectors:
+    # Each - is a prospector. Below are the prospector specific configurations
+    -
+      paths:
+        - /var/log/mobilegame/platform.*.log
+      input_type: log
+      document_type: gs-platform
+      fields:
+        # use product or devel
+        env: devel
+      fields_under_root: true
+    -
+      paths:
+        - /var/log/mobilegame/game_suzhoumj.*.log
+      input_type: log
+      document_type: gs-suzhoumj
+      fields:
+        # use product or devel
+        env: devel
+      fields_under_root: true
+    -
+      paths:
+        - /var/log/mobilegame/game_nanjingmj.*.log
+      input_type: log
+      document_type: gs-nanjingmj
+      fields:
+        # use product or devel
+        env: devel
+      fields_under_root: true
+  registry_file: /etc/filebeat/registry
+
+############################# Output ##########################################
+output:
+  ### Logstash as output
+  logstash:
+    # The Logstash hosts
+    # you must create the ranhcer service(external service) logshipper to point to real server. aliyun ecs:172.16.18.19 wan:114.55.18.39 
+    hosts: ["logshipper:5014"]
+
+############################# Shipper #########################################
+
+shipper:
+  # The name of the shipper that publishes the network data. It can be used to group
+  # all the transactions sent by a single shipper in the web interface.
+  # If this options is not defined, the hostname is used.
+  name: "172.16.17.5"
+
+logging:
+  files:
+    # Configure log file size limit. If limit is reached, log file will be
+    # automatically rotated
+    rotateeverybytes: 10485760 # = 10MB
+

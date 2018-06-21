@@ -1,0 +1,20 @@
+@docker build -t "dockerhub.ucop.io/mobile/mgserver-build:1.0.0" -f "Dockerfile-onbuild" .
+@docker push dockerhub.ucop.io/mobile/mgserver-build:1.0.0
+docker build -t "mgserver" .
+echo "------------------------------------"
+echo "ConsulAddr 192.168.20.102:8500"
+echo "publichost your public ip"
+echo "------------------------------------"
+echo "run platform # docker run --rm -it -p 8001:8001 -p 5100:5100 -p 8002:8002 -e NODETYPE=platform -e ConsulAddr=192.168.20.102:8500 -e publichost=192.168.20.122 -e groupid=zxdevel mgserver"
+echo "run testgame # docker run --rm -it -p 18001:8001 -p 18080:8080 -p 5001:5001 -e NODETYPE=testgame -e ConsulAddr=192.168.26.154:8500 -e publichost=192.168.26.154 -e groupid=888 mgserver"
+echo "run testgame # docker run --rm -it -p 18002:8001 -p 18082:8080 -p 5002:5002 -e NODETYPE=texas -e ConsulAddr=192.168.26.154:8500 -e publichost=192.168.26.154 -e groupid=888 mgserver"
+echo "run nanjingmj # docker run --rm -it -p 18101:18101 -p 5101:5101 -e NODETYPE=MJGame/nanjingmj -e ConsulAddr=192.168.20.102:8500 -e publichost=192.168.20.102 -e groupid=888 mgserver"
+echo "run suzhoumj # docker run --rm -it -p 18002:18002 -p 5102:5102 -e NODETYPE=MJGame/suzhoumj -e ConsulAddr=192.168.26.154:8500 -e publichost=192.168.26.154 -e groupid=888 mgserver"
+echo "run wuhumj # docker run --rm -it -p 18004:18004 -p 5104:5104 -e NODETYPE=MJGame/wuhumj -e ConsulAddr=192.168.26.154:8500 -e publichost=192.168.26.154 -e groupid=888 mgserver"
+echo "run hefeimj # docker run --rm -it -p 18003:18003 -p 5103:5103 -e NODETYPE=MJGame/hefeimj -e ConsulAddr=192.168.26.154:8500 -e publichost=192.168.26.154 -e groupid=888 mgserver"
+echo "run errenmj # docker run --rm -it -p 18012:18012 -p 5112:5112 -e NODETYPE=MJGame/errenmj -e ConsulAddr=192.168.20.102:8500 -e publichost=192.168.20.122 groupid=zxdevel mgserver"
+echo "run maanshanmj # docker run --rm -it -p 18006:18006 -p 5106:5106 -e NODETYPE=MJGame/maanshanmj -e ConsulAddr=192.168.26.154:8500 -e publichost=192.168.26.154 -e groupid=888 mgserver"
+echo "run xinghuamj # docker run --rm -it -p 18005:18005 -p 5105:5105 -e NODETYPE=MJGame/xinghuamj -e ConsulAddr=192.168.26.154:8500 -e publichost=192.168.26.154 -e groupid=888 mgserver"
+echo "run zhenjiangmj # docker run --rm -it -p 18009:18009 -p 5109:5109 -e NODETYPE=MJGame/zhenjiangmj -e ConsulAddr=192.168.20.102:8500 -e publichost=192.168.20.102 -e groupid=888 mgserver"
+echo "run wuximj # docker run --rm -it -p 18108:18108 -p 5108:5108 -e NODETYPE=MJGame/wuximj -e ConsulAddr=192.168.20.102:8500 -e publichost=192.168.20.102 -e groupid=888 mgserver"
+echo "run taizhoumj # docker run --rm -it -p 18007:18007 -p 5107:5107 -e NODETYPE=MJGame/taizhoumj -e ConsulAddr=192.168.20.102:8500 -e publichost=192.168.20.102 -e groupid=devel_20_102 mgserver"

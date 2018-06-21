@@ -1,0 +1,1 @@
+lua ./unitTest/unitTest.lua
